@@ -40,8 +40,16 @@ class TrackersViewController: UIViewController {
         return label
     } ()
     
+    private lazy var trackersCollectionView: UICollectionView = {
+        let layout = UICollectionViewFlowLayout()
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        collectionView.alwaysBounceVertical = true
+        return collectionView
+    }()
+    
     @objc func addTrackerButtonTapped() {
-        let categorySelectionVC = CategorySelectionViewController()
+        let categorySelectionVC = TrackerTypeViewController()
         let navController = UINavigationController(rootViewController: categorySelectionVC)
         present(navController, animated: true, completion: nil)
     }

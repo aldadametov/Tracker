@@ -1,7 +1,29 @@
 import UIKit
 
-class NewHabitViewController: UIViewController {
 
+class TrackerViewController: UIViewController, ScheduleSelectionViewControllerDelegate {
+    
+    func didSelectSchedule(_ selectedSchedule: [Schedule]) {
+            self.schedule = selectedSchedule
+            print("Выбранные дни обновлены: \(selectedSchedule)")
+            tableView.reloadData()
+        }
+    
+    
+    var schedule: [Schedule] = []
+    var completionHandler: ((_ tracker: Tracker?) -> Void)?
+    private var selectedEmoji = ""
+    private var selectedColor: UIColor? = nil
+    var isEvent: Bool = false
+    init(isEvent: Bool = false) {
+        self.isEvent = isEvent
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     let emojiNames = ["Emoji-1", "Emoji-2", "Emoji-3", "Emoji-4", "Emoji-5", "Emoji-6", "Emoji-7", "Emoji-8", "Emoji-9", "Emoji-10", "Emoji-11", "Emoji-12", "Emoji-13", "Emoji-14", "Emoji-15", "Emoji-16", "Emoji-17", "Emoji-18"]
 
     let scrollView: UIScrollView = {
@@ -31,9 +53,9 @@ class NewHabitViewController: UIViewController {
         let textField = UITextField()
         textField.placeholder = "Введите название трекера"
         textField.backgroundColor = UIColor(red: 0.902, green: 0.91, blue: 0.922, alpha: 0.3)
-        textField.layer.cornerRadius = 16 // Устанавливаем радиус углов
-        textField.layer.borderWidth = 0 // Устанавливаем толщину рамки в 0, чтобы убрать обрамление
-        textField.layer.masksToBounds = true // Обрезаем контент, чтобы он не выходил за пределы радиуса углов
+        textField.layer.cornerRadius = 16
+        textField.layer.borderWidth = 0
+        textField.layer.masksToBounds = true
         textField.translatesAutoresizingMaskIntoConstraints = false
 
         let paddingView = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: textField.frame.height))
@@ -42,11 +64,8 @@ class NewHabitViewController: UIViewController {
         return textField
     }()
 
-    var habitCategory: String?
-    var habitSchedule: String?
-
     let tableView: UITableView = {
-        let tableView = UITableView()
+        let tableView = UITableView(frame: .zero, style: .plain)
         tableView.translatesAutoresizingMaskIntoConstraints = false
         let cornerRadius: CGFloat = 16.0
         tableView.layer.cornerRadius = cornerRadius
@@ -55,6 +74,8 @@ class NewHabitViewController: UIViewController {
         tableView.isScrollEnabled = false
         return tableView
     }()
+    
+    var tableViewHeightConstraint: NSLayoutConstraint!
 
     let emojiLabel: UILabel = {
         let label = UILabel()
@@ -63,8 +84,6 @@ class NewHabitViewController: UIViewController {
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
-
-    var selectedEmoji: String?
 
     let colorLabel: UILabel = {
         let label = UILabel()
@@ -129,13 +148,23 @@ class NewHabitViewController: UIViewController {
         emojiCollectionView.register(EmojiCollectionViewCell.self, forCellWithReuseIdentifier: "EmojiCell")
         colorCollectionView.register(ColorCollectionViewCell.self, forCellWithReuseIdentifier: "ColorCell")
 
-        setUpConstraints()
+        
         
         tableView.delegate = self
         tableView.dataSource = self
-
+        
+        setUpConstraints()
+        
         setupEmojiCollectionView()
         setupColorCollectionView()
+        
+        if isEvent {
+            tableViewHeightConstraint = tableView.heightAnchor.constraint(equalToConstant: 75)
+            titleLabel.text = "Новое нерегулярное событие"
+        } else {
+            tableViewHeightConstraint = tableView.heightAnchor.constraint(equalToConstant: 150)
+        }
+        tableViewHeightConstraint.isActive = true
     }
     
     private func addSubviews() {
@@ -151,8 +180,8 @@ class NewHabitViewController: UIViewController {
         contentView.addSubview(colorView)
         contentView.addSubview(cancelButton)
         contentView.addSubview(createButton)
-        contentView.addSubview(emojiCollectionView) // Добавьте collectionView
-        contentView.addSubview(colorCollectionView) // Добавьте colorCollectionView
+        contentView.addSubview(emojiCollectionView)
+        contentView.addSubview(colorCollectionView)
     }
     
     private func setUpConstraints() {
@@ -170,11 +199,11 @@ class NewHabitViewController: UIViewController {
             contentView.heightAnchor.constraint(equalToConstant: 900),
 
             titleLabel.widthAnchor.constraint(equalToConstant: 375),
-            titleLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-            titleLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 20),
+            titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            titleLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 30),
 
 
-            nameTextField.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 24),
+            nameTextField.topAnchor.constraint(equalTo: scrollView.topAnchor, constant: 40),
             nameTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             nameTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             nameTextField.heightAnchor.constraint(equalToConstant: 75),
@@ -224,33 +253,65 @@ class NewHabitViewController: UIViewController {
         colorCollectionView.delegate = self
         colorCollectionView.dataSource = self
     }
+    
+    @objc private func cancelButtonTapped() {
+        dismiss(animated: true)
+    }
+    
+    @objc private func createButtonTapped() {
+        let tracker = Tracker(name: nameTextField.text ?? "",
+                              color: selectedColor,
+                              emoji: selectedEmoji,
+                              schedule: schedule)
+        dismiss(animated: true)
+        completionHandler?(tracker)
+    }
 }
 
 // MARK: - UITableViewDelegate, UITableViewDataSource
 
-extension NewHabitViewController: UITableViewDelegate, UITableViewDataSource {
+extension TrackerViewController: UITableViewDelegate, UITableViewDataSource {
+    func numberOfSections(in tableView: UITableView) -> Int {
+        return 1
+    }
+
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 2
+        return isEvent ? 1 : 2
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "CustomCell", for: indexPath) as! CustomTableViewCell
 
-        if indexPath.row == 0 {
-            cell.textLabel?.text = "Категория"
-            cell.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
-        } else if indexPath.row == 1 {
-            cell.textLabel?.text = "Расписание"
-            cell.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0 , right: 375)
+        if indexPath.row == 0 && !isEvent {
+            cell.configure(title: "Категория", description: "")
+        } else if indexPath.row == 1 && !isEvent {
+            cell.configure(title: "Расписание", description: scheduleDescription())
+        } else {
+            cell.configure(title: "Категория", description: "")
         }
+
+        cell.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: indexPath.row == 0 ? 16 : 375)
+
         return cell
     }
+
+    func scheduleDescription() -> String {
+        if !schedule.isEmpty {
+            return schedule.map { $0.shortRepresentation() }.joined(separator: ", ")
+        }
+        return ""
+    }
+
+
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
 
-        if indexPath.section == 0 {
-        } else if indexPath.section == 1 {
+        if indexPath.row == 1 && !isEvent {
+            let scheduleSelectionVC = ScheduleSelectionViewController()
+            scheduleSelectionVC.selectedSchedule = self.schedule
+            scheduleSelectionVC.delegate = self
+            self.navigationController?.pushViewController(scheduleSelectionVC, animated: true)
         }
     }
 
@@ -261,7 +322,7 @@ extension NewHabitViewController: UITableViewDelegate, UITableViewDataSource {
 
 // MARK: - UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout
 
-extension NewHabitViewController: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+extension TrackerViewController: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         if collectionView == emojiCollectionView {
             return emojiNames.count

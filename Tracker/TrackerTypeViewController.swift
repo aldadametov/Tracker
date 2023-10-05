@@ -1,13 +1,7 @@
-//
-//  CategorySelectionViewController.swift
-//  Tracker
-//
-//  Created by Алишер Дадаметов on 13.09.2023.
-//
-
 import UIKit
 
-class CategorySelectionViewController: UIViewController {
+class TrackerTypeViewController: UIViewController {
+    var selectedCategory: String?
 
     let titleLabel: UILabel = {
         let label = UILabel()
@@ -19,7 +13,7 @@ class CategorySelectionViewController: UIViewController {
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
-    
+
     let habitButton: UIButton = {
         let button = UIButton()
         button.setTitle("Привычка", for: .normal)
@@ -30,7 +24,7 @@ class CategorySelectionViewController: UIViewController {
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
-    
+
     let eventButton: UIButton = {
         let button = UIButton()
         button.setTitle("Нерегулярное событие", for: .normal)
@@ -45,43 +39,46 @@ class CategorySelectionViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
-        
-        
+
         view.addSubview(titleLabel)
         view.addSubview(habitButton)
         view.addSubview(eventButton)
-        
+
         NSLayoutConstraint.activate([
             titleLabel.widthAnchor.constraint(equalToConstant: 375),
             titleLabel.heightAnchor.constraint(equalToConstant: 114),
             titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             titleLabel.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -698),
-            
+
             habitButton.widthAnchor.constraint(equalToConstant: 335),
             habitButton.heightAnchor.constraint(equalToConstant: 60),
             habitButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             habitButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             habitButton.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 281),
-            
+
             eventButton.widthAnchor.constraint(equalToConstant: 335),
             eventButton.heightAnchor.constraint(equalToConstant: 60),
             eventButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             eventButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             eventButton.topAnchor.constraint(equalTo: habitButton.bottomAnchor, constant: 16),
         ])
+
         habitButton.addTarget(self, action: #selector(habitButtonTapped), for: .touchUpInside)
         eventButton.addTarget(self, action: #selector(eventButtonTapped), for: .touchUpInside)
     }
-    
+
     @objc func habitButtonTapped() {
-        let createHabitVC = NewHabitViewController() // Создайте экземпляр контроллера создания привычки
-        let navController = UINavigationController(rootViewController: createHabitVC) // Упаковываем контроллер в навигационный контроллер
-        present(navController, animated: true, completion: nil) // Отображаем экран модально
+        selectedCategory = "Привычка"
+        let createHabitVC = TrackerViewController(isEvent: false)
+        let navController = UINavigationController(rootViewController: createHabitVC)
+        present(navController, animated: true, completion: nil)
     }
 
-    
     @objc func eventButtonTapped() {
-        // Обработка нажатия на кнопку "Нерегулярное событие"
+        selectedCategory = "Нерегулярное событие"
+        let createEventVC = TrackerViewController(isEvent: true)
+        let navController = UINavigationController(rootViewController: createEventVC)
+        present(navController, animated: true, completion: nil)
     }
 }
 
