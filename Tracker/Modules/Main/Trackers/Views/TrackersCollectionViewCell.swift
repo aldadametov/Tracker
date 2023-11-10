@@ -16,11 +16,8 @@ class TrackerCollectionViewCell: UICollectionViewCell {
     
     weak var delegate: TrackerCellDelegate?
     
-
     var isTrackerCompleted = false
     var indexPath: IndexPath = IndexPath(row: 0, section: 0)
-    
-    
     
     let trackerCardView: UIView = {
         var view = UIView()

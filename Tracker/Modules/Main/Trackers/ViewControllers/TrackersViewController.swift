@@ -117,8 +117,9 @@ class TrackersViewController: UIViewController {
     }
     
     @objc func addTrackerButtonTapped() {
-        let categorySelectionVC = TrackerTypeViewController()
-        let navController = UINavigationController(rootViewController: categorySelectionVC)
+        let trackerTypeSelectionVC = TrackerTypeSelectionViewController()
+        trackerTypeSelectionVC.delegate = self // Устанавливаем делегата на себя
+        let navController = UINavigationController(rootViewController: trackerTypeSelectionVC)
         present(navController, animated: true, completion: nil)
     }
     
@@ -143,7 +144,6 @@ class TrackersViewController: UIViewController {
                 let filteredTrackers = category.trackers.filter { $0.schedule.contains(selectedDay) }
                 return filteredTrackers.isEmpty ? nil : TrackerCategory(title: category.title, trackers: filteredTrackers)
             }
-            
             print("Updated visible categories: \(visibleCategories)")
         } else {
             print("Не удалось определить день недели")
@@ -215,8 +215,7 @@ class TrackersViewController: UIViewController {
         trackersCollectionView.dataSource = self
         addSubViews()
         setUpConstraints()
-        showPlaceHolder()
-        //addNewTrackers()
+        updateVisibleCategories()
     }
 }
 
@@ -351,6 +350,40 @@ extension TrackersViewController: TrackerCellDelegate {
         print(completedTrackers)
     }
 }
+
+//MARK: TrackerViewControllerDelegate
+
+extension TrackersViewController: TrackerCreationDelegate {
+    func didCreateTracker(_ tracker: Tracker, isEvent: Bool) {
+        // Настройка новой категории на основе созданного трекера
+        let newCategory = TrackerCategory(
+            title: "Важное",
+            trackers: [tracker]  // Новый трекер добавляется в массив
+        )
+        
+        // Обновление существующих категорий, если таковые есть
+        var updatedCategories = categories.map { category -> TrackerCategory in
+            if category.title == newCategory.title {
+                return TrackerCategory(title: category.title, trackers: category.trackers + [tracker])
+            } else {
+                return category
+            }
+        }
+        
+        // Если категории не были обновлены (не существует категории с таким заголовком), добавьте новую категорию
+        if !updatedCategories.contains(where: { $0.title == newCategory.title }) {
+            updatedCategories.append(newCategory)
+        }
+
+        categories = updatedCategories  // Обновление массива категорий
+        updateVisibleCategories()
+        trackersCollectionView.reloadData()
+        showPlaceHolder()
+        
+        dismiss(animated: true)
+    }
+}
+
 
 
 

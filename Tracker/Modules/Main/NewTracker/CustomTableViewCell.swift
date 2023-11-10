@@ -18,7 +18,7 @@ class CustomTableViewCell: UITableViewCell {
     let descriptionLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.font = UIFont.systemFont(ofSize: 17)
+        label.font = UIFont(name: "SFPro-Regular", size: 17)
         label.textColor = UIColor(red: 0.682, green: 0.686, blue: 0.706, alpha: 1)
         return label
     }()

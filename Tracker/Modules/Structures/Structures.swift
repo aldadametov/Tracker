@@ -25,6 +25,7 @@ struct TrackerRecord {
     let date: Date
 }
 
+
 enum Schedule: Int, CaseIterable {
     case monday = 2
     case tuesday = 3

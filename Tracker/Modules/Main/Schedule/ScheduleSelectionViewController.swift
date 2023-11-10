@@ -7,7 +7,7 @@
 
 import UIKit
 
-protocol ScheduleSelectionViewControllerDelegate: AnyObject {
+protocol ScheduleSelectionDelegate: AnyObject {
     func didSelectSchedule(_ selectedSchedule: [Schedule])
 }
 
@@ -15,7 +15,7 @@ class ScheduleSelectionViewController: UIViewController {
     
     var selectedSchedule: [Schedule] = []
     private var selectedDays: [Schedule] = []
-    weak var delegate: ScheduleSelectionViewControllerDelegate?
+    weak var delegate: ScheduleSelectionDelegate?
     
     private let titleLabel: UILabel = {
         let label = UILabel()

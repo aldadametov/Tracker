@@ -1,8 +1,9 @@
 import UIKit
 
-class TrackerTypeViewController: UIViewController {
+class TrackerTypeSelectionViewController: UIViewController {
     var selectedCategory: String?
-
+    weak var delegate: TrackerCreationDelegate?
+    
     let titleLabel: UILabel = {
         let label = UILabel()
         label.text = "Создание трекера"
@@ -45,10 +46,10 @@ class TrackerTypeViewController: UIViewController {
         view.addSubview(eventButton)
 
         NSLayoutConstraint.activate([
-            titleLabel.widthAnchor.constraint(equalToConstant: 375),
-            titleLabel.heightAnchor.constraint(equalToConstant: 114),
+            titleLabel.widthAnchor.constraint(equalToConstant: 149),
+            titleLabel.heightAnchor.constraint(equalToConstant: 22),
             titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            titleLabel.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -698),
+            titleLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 30),
 
             habitButton.widthAnchor.constraint(equalToConstant: 335),
             habitButton.heightAnchor.constraint(equalToConstant: 60),
@@ -69,14 +70,16 @@ class TrackerTypeViewController: UIViewController {
 
     @objc func habitButtonTapped() {
         selectedCategory = "Привычка"
-        let createHabitVC = TrackerViewController(isEvent: false)
+        let createHabitVC = TrackerCreationViewController(isEvent: false)
+        createHabitVC.delegate = delegate // Установим делегата для вновь созданного контроллера
         let navController = UINavigationController(rootViewController: createHabitVC)
         present(navController, animated: true, completion: nil)
     }
 
     @objc func eventButtonTapped() {
         selectedCategory = "Нерегулярное событие"
-        let createEventVC = TrackerViewController(isEvent: true)
+        let createEventVC = TrackerCreationViewController(isEvent: true)
+        createEventVC.delegate = delegate // Установим делегата для вновь созданного контроллера
         let navController = UINavigationController(rootViewController: createEventVC)
         present(navController, animated: true, completion: nil)
     }
