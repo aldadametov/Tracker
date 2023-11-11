@@ -108,7 +108,7 @@ class TrackerCreationViewController: UIViewController, ScheduleSelectionDelegate
         tableView.register(CustomTableViewCell.self, forCellReuseIdentifier: "CustomCell")
         tableView.delegate = self
         tableView.dataSource = self
-        
+        hideKeyboardWhenTappedAround()
         setUpConstraints()
         
         if isEvent {

@@ -62,7 +62,18 @@ class TrackersViewController: UIViewController {
             updateVisibleCategories()
         }
     }
-    let datePicker = UIDatePicker()
+    private lazy var datePicker: UIDatePicker = {
+        let datePicker = UIDatePicker()
+        datePicker.translatesAutoresizingMaskIntoConstraints = false
+        datePicker.preferredDatePickerStyle = .compact
+        datePicker.datePickerMode = .date
+        datePicker.locale = Locale(identifier: "ru_RU")
+        datePicker.calendar = Calendar(identifier: .gregorian)
+        datePicker.calendar.firstWeekday = 2
+        datePicker.addTarget(self, action: #selector(datePickerValueChanged), for: .valueChanged)
+        return datePicker
+    }()
+    
     let searchBar = UISearchBar()
     let trackersLabel: UILabel = {
         let label = UILabel()
@@ -126,9 +137,8 @@ class TrackersViewController: UIViewController {
     
     @objc func datePickerValueChanged(sender: UIDatePicker) {
         let selectedDate = sender.date
-        let localTimeZone = TimeZone.current
-        
-        let localDate = selectedDate.addingTimeInterval(TimeInterval(localTimeZone.secondsFromGMT(for: selectedDate)))
+        let calendar = Calendar.current
+        let localDate = calendar.startOfDay(for: selectedDate)
         currentDate = localDate
         
         updateVisibleCategories()
@@ -195,12 +205,8 @@ class TrackersViewController: UIViewController {
             let customImage = UIImage(named: "Add tracker")
             let leftButton = UIBarButtonItem(image: customImage, style: .plain, target: self, action: #selector(addTrackerButtonTapped))
             navBar.topItem?.setLeftBarButton(leftButton, animated: false)
-            
-            datePicker.datePickerMode = .date
-            datePicker.preferredDatePickerStyle = .compact
-            datePicker.addTarget(self, action: #selector(datePickerValueChanged), for: .valueChanged)
-            let dateBarButton = UIBarButtonItem(customView: datePicker)
-            navBar.topItem?.setRightBarButton(dateBarButton, animated: false)
+
+            navBar.topItem?.setRightBarButton(UIBarButtonItem(customView: datePicker), animated: false)
         }
         
         trackersCollectionView.register(SectionHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "SectionHeader")
