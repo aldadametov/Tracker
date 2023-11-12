@@ -219,7 +219,6 @@ class TrackerCreationViewController: UIViewController, ScheduleSelectionDelegate
     
     private func updateConstraintsForSymbolsLimitLabel(_ isVisible: Bool) {
         if isVisible {
-            // Показать лейбл и обновить констрейнты
             contentView.addSubview(symbolsLimitLabel)
 
             NSLayoutConstraint.activate([
@@ -231,7 +230,6 @@ class TrackerCreationViewController: UIViewController, ScheduleSelectionDelegate
 
             tableView.topAnchor.constraint(equalTo: nameTextField.bottomAnchor, constant: 62).isActive = true
         } else {
-            // Скрыть лейбл и обновить констрейнты
             symbolsLimitLabel.removeFromSuperview()
             tableView.topAnchor.constraint(equalTo: nameTextField.bottomAnchor, constant: 24).isActive = true
         }

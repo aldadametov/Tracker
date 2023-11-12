@@ -395,13 +395,11 @@ extension TrackersViewController: TrackerCellDelegate {
 
 extension TrackersViewController: TrackerCreationDelegate {
     func didCreateTracker(_ tracker: Tracker, isEvent: Bool) {
-        // Настройка новой категории на основе созданного трекера
         let newCategory = TrackerCategory(
             title: "Важное",
-            trackers: [tracker]  // Новый трекер добавляется в массив
+            trackers: [tracker]
         )
         
-        // Обновление существующих категорий, если таковые есть
         var updatedCategories = categories.map { category -> TrackerCategory in
             if category.title == newCategory.title {
                 return TrackerCategory(title: category.title, trackers: category.trackers + [tracker])
@@ -410,12 +408,11 @@ extension TrackersViewController: TrackerCreationDelegate {
             }
         }
         
-        // Если категории не были обновлены (не существует категории с таким заголовком), добавьте новую категорию
         if !updatedCategories.contains(where: { $0.title == newCategory.title }) {
             updatedCategories.append(newCategory)
         }
 
-        categories = updatedCategories  // Обновление массива категорий
+        categories = updatedCategories
         updateVisibleCategories()
         trackersCollectionView.reloadData()
         showPlaceHolder()

@@ -11,7 +11,6 @@ class SectionHeaderView: UICollectionReusableView {
     
     let titleLabel: UILabel = {
         let label = UILabel()
-        //label.frame = CGRect(x: 0, y: 0, width: 146, height: 18)
         label.textColor = UIColor(red: 0.102, green: 0.106, blue: 0.133, alpha: 1)
         label.font = UIFont(name: "SFPro-Bold", size: 19)
         return label
