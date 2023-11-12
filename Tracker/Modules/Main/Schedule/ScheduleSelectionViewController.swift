@@ -121,7 +121,15 @@ extension ScheduleSelectionViewController: UITableViewDelegate, UITableViewDataS
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ScheduleCell", for: indexPath) as! ScheduleTableViewCell
         
-        cell.textLabel?.text = Schedule(rawValue: indexPath.row + 1)?.representation()
+        let day: Schedule
+        if indexPath.row == tableView.numberOfRows(inSection: indexPath.section) - 1 {
+            day = .sunday
+        } else {
+            day = Schedule(rawValue: indexPath.row + 2)!
+        }
+        
+        cell.textLabel?.text = day.representation()
+        cell.selectionStyle = .none
         
         if indexPath.row == tableView.numberOfRows(inSection: indexPath.section) - 1 {
             cell.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 375)
@@ -130,12 +138,12 @@ extension ScheduleSelectionViewController: UITableViewDelegate, UITableViewDataS
         }
         
         cell.toggleSwitchAction = { [weak self] isOn in
-            guard let self = self, let selectedDay = Schedule(rawValue: indexPath.row + 1) else { return }
+            guard let self = self else { return }
             
             if isOn {
-                self.selectedDays.append(selectedDay)
+                self.selectedDays.append(day)
             } else {
-                if let index = self.selectedDays.firstIndex(of: selectedDay) {
+                if let index = self.selectedDays.firstIndex(of: day) {
                     self.selectedDays.remove(at: index)
                 }
             }
@@ -144,5 +152,8 @@ extension ScheduleSelectionViewController: UITableViewDelegate, UITableViewDataS
         
         return cell
     }
+
+
+
 
 }

@@ -6,11 +6,6 @@ protocol TrackerCreationDelegate: AnyObject {
 
 class TrackerCreationViewController: UIViewController, ScheduleSelectionDelegate {
     
-    func didSelectSchedule(_ selectedSchedule: [Schedule]) {
-        self.schedule = selectedSchedule
-        print("Выбранные дни обновлены: \(selectedSchedule)")
-        tableView.reloadData()
-    }
     
     weak var delegate: TrackerCreationDelegate?
 
@@ -58,11 +53,34 @@ class TrackerCreationViewController: UIViewController, ScheduleSelectionDelegate
         textField.layer.borderWidth = 0
         textField.layer.masksToBounds = true
         textField.translatesAutoresizingMaskIntoConstraints = false
-        
         let paddingView = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: textField.frame.height))
         textField.leftView = paddingView
         textField.leftViewMode = .always
         return textField
+    }()
+    
+    let clearButton: UIButton = {
+        let button = UIButton(type: .custom)
+        button.setImage(UIImage(systemName: "xmark.circle.fill")?.withRenderingMode(.alwaysTemplate), for: .normal)
+        button.tintColor = .lightGray
+        button.frame = CGRect(x: 0, y: 0, width: 20, height: 20)
+        button.contentEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 12) // добавленный отступ влево
+        button.contentMode = .scaleAspectFit
+        button.isHidden = true
+        return button
+    }()
+    
+    let maxCharacterCount = 38
+    
+    private lazy var symbolsLimitLabel: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.text = "Ограничение 38 символов"
+        label.font = UIFont(name: "SFPro-Regular", size: 17)
+        label.textColor = UIColor(red: 0.961, green: 0.42, blue: 0.424, alpha: 1)
+        label.textAlignment = .center
+        label.isHidden = true
+        return label
     }()
     
     let tableView: UITableView = {
@@ -111,14 +129,19 @@ class TrackerCreationViewController: UIViewController, ScheduleSelectionDelegate
         hideKeyboardWhenTappedAround()
         setUpConstraints()
         
+        
         if isEvent {
             tableViewHeightConstraint = tableView.heightAnchor.constraint(equalToConstant: 75)
             titleLabel.text = "Новое нерегулярное событие"
         } else {
             tableViewHeightConstraint = tableView.heightAnchor.constraint(equalToConstant: 150)
         }
+        nameTextField.rightView = clearButton
+        nameTextField.rightViewMode = .whileEditing
         tableViewHeightConstraint.isActive = true
-        
+        updateCreateButtonState()
+        clearButton.addTarget(self, action: #selector(clearButtonTapped), for: .touchUpInside)
+        nameTextField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
         cancelButton.addTarget(self, action: #selector(cancelButtonTapped), for: .touchUpInside)
         createButton.addTarget(self, action: #selector(createButtonTapped), for: .touchUpInside)
     }
@@ -178,6 +201,61 @@ class TrackerCreationViewController: UIViewController, ScheduleSelectionDelegate
         ])
     }
     
+    @objc private func textFieldDidChange() {
+        guard let text = nameTextField.text else { return }
+
+        clearButton.isHidden = text.isEmpty
+
+        if text.count > maxCharacterCount {
+            // Пользователь превысил допустимое количество символов, отобразите лейбл и обновите иерархию элементов
+            symbolsLimitLabel.isHidden = false
+            updateConstraintsForSymbolsLimitLabel(true)
+        } else {
+            symbolsLimitLabel.isHidden = true
+            updateConstraintsForSymbolsLimitLabel(false)
+        }
+        updateCreateButtonState()
+    }
+    
+    private func updateConstraintsForSymbolsLimitLabel(_ isVisible: Bool) {
+        if isVisible {
+            // Показать лейбл и обновить констрейнты
+            contentView.addSubview(symbolsLimitLabel)
+
+            NSLayoutConstraint.activate([
+                symbolsLimitLabel.topAnchor.constraint(equalTo: nameTextField.bottomAnchor, constant: 8),
+                symbolsLimitLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+                symbolsLimitLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+                symbolsLimitLabel.bottomAnchor.constraint(equalTo: tableView.topAnchor, constant: -32)
+            ])
+
+            tableView.topAnchor.constraint(equalTo: nameTextField.bottomAnchor, constant: 62).isActive = true
+        } else {
+            // Скрыть лейбл и обновить констрейнты
+            symbolsLimitLabel.removeFromSuperview()
+            tableView.topAnchor.constraint(equalTo: nameTextField.bottomAnchor, constant: 24).isActive = true
+        }
+    }
+    
+    func didSelectSchedule(_ selectedSchedule: [Schedule]) {
+        self.schedule = selectedSchedule
+        print("Выбранные дни обновлены: \(selectedSchedule)")
+        tableView.reloadData()
+        updateCreateButtonState()
+    }
+    
+    private func updateCreateButtonState() {
+        let isNameTextFieldEmpty = nameTextField.text?.isEmpty ?? true
+        let isScheduleSelected = !schedule.isEmpty || isEvent
+
+        createButton.isEnabled = !isNameTextFieldEmpty && isScheduleSelected
+    }
+    
+    @objc private func clearButtonTapped() {
+        nameTextField.text = ""
+        clearButton.isHidden = true
+        updateConstraintsForSymbolsLimitLabel(false)
+    }
     
     @objc private func cancelButtonTapped() {
         dismiss(animated: true)
@@ -210,21 +288,26 @@ extension TrackerCreationViewController: UITableViewDelegate, UITableViewDataSou
         
         if indexPath.row == 0 && !isEvent {
             cell.configure(title: "Категория", description: "Важное")
+            cell.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16 )
         } else if indexPath.row == 1 && !isEvent {
             cell.configure(title: "Расписание", description: scheduleDescription())
+            cell.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 375)
         } else {
             cell.configure(title: "Категория", description: "Важное")
+            cell.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 375)
         }
-        
-        cell.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: indexPath.row == 0 ? 16 : 375)
-        
         return cell
     }
     
     func scheduleDescription() -> String {
-        if !schedule.isEmpty {
+        let allDaysOfWeek = Schedule.allCases
+
+        if Set(schedule) == Set(allDaysOfWeek) {
+            return "Каждый День"
+        } else if !schedule.isEmpty {
             return schedule.map { $0.shortRepresentation() }.joined(separator: ", ")
         }
+
         return ""
     }
     
