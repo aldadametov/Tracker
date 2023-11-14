@@ -1,37 +1,37 @@
 import UIKit
 
-class TrackerTypeSelectionViewController: UIViewController {
+final class TrackerTypeSelectionViewController: UIViewController {
     var selectedCategory: String?
     weak var delegate: TrackerCreationDelegate?
     
-    let titleLabel: UILabel = {
+    private let titleLabel: UILabel = {
         let label = UILabel()
         label.text = "Создание трекера"
         label.frame = CGRect(x: 0, y: 0, width: 149, height: 22)
-        label.textColor = UIColor(red: 0.102, green: 0.106, blue: 0.133, alpha: 1)
+        label.textColor = .ypBlack
         label.font = UIFont(name: "SFPro-Medium", size: 16)
         label.textAlignment = .center
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
 
-    let habitButton: UIButton = {
+    private let habitButton: UIButton = {
         let button = UIButton()
         button.setTitle("Привычка", for: .normal)
         button.titleLabel?.font = UIFont(name: "SFPro-Medium", size: 16)
         button.frame = CGRect(x: 0, y: 0, width: 335, height: 60)
-        button.layer.backgroundColor = UIColor(red: 0.102, green: 0.106, blue: 0.133, alpha: 1).cgColor
+        button.backgroundColor = .ypBlack
         button.layer.cornerRadius = 16
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
 
-    let eventButton: UIButton = {
+    private let eventButton: UIButton = {
         let button = UIButton()
         button.setTitle("Нерегулярное событие", for: .normal)
         button.titleLabel?.font = UIFont(name: "SFPro-Medium", size: 16)
         button.frame = CGRect(x: 0, y: 0, width: 335, height: 60)
-        button.layer.backgroundColor = UIColor(red: 0.102, green: 0.106, blue: 0.133, alpha: 1).cgColor
+        button.backgroundColor = .ypBlack
         button.layer.cornerRadius = 16
         button.translatesAutoresizingMaskIntoConstraints = false
         return button

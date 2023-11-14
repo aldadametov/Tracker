@@ -6,24 +6,24 @@
 //
 import UIKit
 
-class CustomTableViewCell: UITableViewCell {
-    let titleLabel: UILabel = {
+final class CustomTableViewCell: UITableViewCell {
+    private let titleLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = UIFont(name: "SFPro-Regular", size: 17)
-        label.textColor = UIColor(red: 0.102, green: 0.106, blue: 0.133, alpha: 1)
+        label.textColor = .ypBlack
         return label
     }()
 
-    let descriptionLabel: UILabel = {
+    private let descriptionLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = UIFont(name: "SFPro-Regular", size: 17)
-        label.textColor = UIColor(red: 0.682, green: 0.686, blue: 0.706, alpha: 1)
+        label.textColor = .ypGray
         return label
     }()
 
-    var titleLabelTopConstraint: NSLayoutConstraint!
+    private var titleLabelTopConstraint: NSLayoutConstraint!
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -52,7 +52,7 @@ class CustomTableViewCell: UITableViewCell {
             descriptionLabel.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -15)
         ])
 
-        self.backgroundColor = UIColor(red: 0.902, green: 0.91, blue: 0.922, alpha: 0.3)
+        self.backgroundColor = .ypBackgroundDay
         self.layer.borderWidth = 0
         self.layer.masksToBounds = true
 
@@ -65,12 +65,8 @@ class CustomTableViewCell: UITableViewCell {
         titleLabel.text = title
         descriptionLabel.text = description
 
-        
-        if description.isEmpty {
-            titleLabelTopConstraint.constant = 14
-        } else {
-            titleLabelTopConstraint.constant = 10
-        }
+        let constant: CGFloat = description.isEmpty ? 14 : 20
+        titleLabelTopConstraint.constant = constant
     }
 }
 

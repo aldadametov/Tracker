@@ -11,8 +11,7 @@ protocol TrackerCellDelegate: AnyObject {
     func addButtonTappedForTracker(at indexPath: IndexPath)
 }
 
-
-class TrackerCollectionViewCell: UICollectionViewCell {
+final class TrackerCollectionViewCell: UICollectionViewCell {
     
     weak var delegate: TrackerCellDelegate?
     
@@ -22,11 +21,10 @@ class TrackerCollectionViewCell: UICollectionViewCell {
     let trackerCardView: UIView = {
         var view = UIView()
         view.frame = CGRect(x: 0, y: 0, width: 167, height: 90)
-        view.layer.backgroundColor = UIColor(red: 0.765, green: 0.706, blue: 0.969, alpha: 1).cgColor
+        view.backgroundColor = .ypBackgroundDay
         view.layer.cornerRadius = 16
         view.layer.borderWidth = 1
         view.layer.borderColor = UIColor(red: 0.682, green: 0.686, blue: 0.706, alpha: 0.3).cgColor
-        //view.clipsToBounds = true
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
@@ -50,13 +48,12 @@ class TrackerCollectionViewCell: UICollectionViewCell {
     let trackerLabel: UILabel = {
         let label = UILabel()
         label.frame = CGRect(x: 0, y: 0, width: 143, height: 34)
-        label.textColor = UIColor(red: 1, green: 1, blue: 1, alpha: 1)
+        label.textColor = .ypWhite
         label.font = UIFont(name: "SFPro-Medium", size: 12)
         label.numberOfLines = 2
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
-    
     
     let quantityManagementView: UIView = {
         let view = UIView()
@@ -65,17 +62,15 @@ class TrackerCollectionViewCell: UICollectionViewCell {
         return view
     }()
     
-    
     let daysCountLabel: UILabel = {
         let label = UILabel()
         label.text = "0 дней"
         label.frame = CGRect(x: 0, y: 0, width: 101, height: 18)
-        label.textColor = UIColor(red: 0.102, green: 0.106, blue: 0.133, alpha: 1)
+        label.textColor = .ypBlack
         label.font = UIFont(name: "SFPro-Medium", size: 12)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
-    
     
     let addButton: UIButton = {
         let button = UIButton()

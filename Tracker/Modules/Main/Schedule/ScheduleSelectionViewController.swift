@@ -11,7 +11,7 @@ protocol ScheduleSelectionDelegate: AnyObject {
     func didSelectSchedule(_ selectedSchedule: [Schedule])
 }
 
-class ScheduleSelectionViewController: UIViewController {
+final class ScheduleSelectionViewController: UIViewController {
     
     var selectedSchedule: [Schedule] = []
     private var selectedDays: [Schedule] = []
@@ -21,7 +21,7 @@ class ScheduleSelectionViewController: UIViewController {
         let label = UILabel()
         label.text = "Расписание"
         label.frame = CGRect(x: 0, y: 0, width: 149, height: 22)
-        label.textColor = UIColor(red: 0.102, green: 0.106, blue: 0.133, alpha: 1)
+        label.textColor = .ypBlack
         label.font = UIFont(name: "SFPro-Medium", size: 16)
         label.textAlignment = .center
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -43,7 +43,7 @@ class ScheduleSelectionViewController: UIViewController {
     private let doneButton: UIButton = {
         let button = UIButton()
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.backgroundColor = UIColor.black
+        button.backgroundColor = .ypBlack
         button.setTitle("Готово", for: .normal)
         button.titleLabel?.font = UIFont(name: "SFPro-Medium", size: 16)
         button.layer.cornerRadius = 16

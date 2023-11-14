@@ -6,12 +6,12 @@
 //
 import UIKit
 
-class SectionHeaderView: UICollectionReusableView {
+final class SectionHeaderView: UICollectionReusableView {
     static let reuseIdentifier = "SectionHeader"
     
     let titleLabel: UILabel = {
         let label = UILabel()
-        label.textColor = UIColor(red: 0.102, green: 0.106, blue: 0.133, alpha: 1)
+        label.textColor = .ypBlack
         label.font = UIFont(name: "SFPro-Bold", size: 19)
         return label
     }()

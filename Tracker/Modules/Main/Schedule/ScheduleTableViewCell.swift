@@ -7,19 +7,20 @@
 
 import UIKit
 
-class ScheduleTableViewCell: UITableViewCell {
+final class ScheduleTableViewCell: UITableViewCell {
     
     let titleLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = UIFont(name: "SFPro-Regular", size: 17)
+        label.textColor = .ypBlack
         return label
     }()
     
     let toggleSwitch: UISwitch = {
         let toggleSwitch = UISwitch()
         toggleSwitch.translatesAutoresizingMaskIntoConstraints = false
-        toggleSwitch.onTintColor = UIColor(red: 0.215, green: 0.447, blue: 0.905, alpha: 1.0) // Устанавливаем
+        toggleSwitch.onTintColor = .ypBlue
         return toggleSwitch
     }()
     
@@ -30,8 +31,8 @@ class ScheduleTableViewCell: UITableViewCell {
         contentView.addSubview(titleLabel)
         contentView.addSubview(toggleSwitch)
         
-        contentView.backgroundColor = UIColor(red: 0.902, green: 0.91, blue: 0.922, alpha: 0.3)
-        contentView.layer.masksToBounds = true // Обрезаем контент
+        contentView.backgroundColor = .ypBackgroundDay
+        contentView.layer.masksToBounds = true
         
         NSLayoutConstraint.activate([
             titleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),

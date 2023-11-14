@@ -7,25 +7,6 @@
 
 import UIKit
 
-struct Tracker {
-    let id = UUID()
-    let name: String
-    let color: UIColor?
-    let emoji: String
-    let schedule: [Schedule]
-}
-
-struct TrackerCategory {
-    let title: String
-    let trackers: [Tracker]
-}
-
-struct TrackerRecord {
-    let id: UUID
-    let date: Date
-}
-
-
 enum Schedule: Int, CaseIterable {
     case monday = 2
     case tuesday = 3

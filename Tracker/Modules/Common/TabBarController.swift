@@ -7,7 +7,7 @@
 
 import UIKit
 
-class TabBarController: UITabBarController {
+final class TabBarController: UITabBarController {
     override func viewDidLoad() {
         super.viewDidLoad()
         let trackersViewController = TrackersViewController()
@@ -36,7 +36,6 @@ class TabBarController: UITabBarController {
                 UITabBar.appearance().scrollEdgeAppearance = tabBarAppearance
             }
         }
-
 
         self.viewControllers = [trackersNavigationController, statisticsNavigationController]
         

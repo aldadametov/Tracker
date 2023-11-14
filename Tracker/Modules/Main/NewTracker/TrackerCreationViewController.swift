@@ -4,8 +4,7 @@ protocol TrackerCreationDelegate: AnyObject {
     func didCreateTracker(_ tracker: Tracker, isEvent: Bool)
 }
 
-class TrackerCreationViewController: UIViewController, ScheduleSelectionDelegate {
-    
+final class TrackerCreationViewController: UIViewController, ScheduleSelectionDelegate {
     
     weak var delegate: TrackerCreationDelegate?
 
@@ -20,8 +19,7 @@ class TrackerCreationViewController: UIViewController, ScheduleSelectionDelegate
         fatalError("init(coder:) has not been implemented")
     }
     
-    
-    let scrollView: UIScrollView = {
+    private let scrollView: UIScrollView = {
         let scrollView = UIScrollView()
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         return scrollView
@@ -33,21 +31,21 @@ class TrackerCreationViewController: UIViewController, ScheduleSelectionDelegate
         return view
     }()
     
-    let titleLabel: UILabel = {
+    private let titleLabel: UILabel = {
         let label = UILabel()
         label.text = "Новая Привычка"
         label.frame = CGRect(x: 0, y: 0, width: 149, height: 22)
-        label.textColor = UIColor(red: 0.102, green: 0.106, blue: 0.133, alpha: 1)
+        label.textColor = .ypBlack
         label.font = UIFont(name: "SFPro-Medium", size: 16)
         label.textAlignment = .center
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
     
-    let nameTextField: UITextField = {
+    private let nameTextField: UITextField = {
         let textField = UITextField()
         textField.placeholder = "Введите название трекера"
-        textField.backgroundColor = UIColor(red: 0.902, green: 0.91, blue: 0.922, alpha: 0.3)
+        textField.backgroundColor = .ypBackgroundDay
         textField.font = UIFont(name: "SFPro-Regular", size: 17)
         textField.layer.cornerRadius = 16
         textField.layer.borderWidth = 0
@@ -59,7 +57,7 @@ class TrackerCreationViewController: UIViewController, ScheduleSelectionDelegate
         return textField
     }()
     
-    let clearButton: UIButton = {
+    private let clearButton: UIButton = {
         let button = UIButton(type: .custom)
         button.setImage(UIImage(systemName: "xmark.circle.fill")?.withRenderingMode(.alwaysTemplate), for: .normal)
         button.tintColor = .lightGray
@@ -70,20 +68,20 @@ class TrackerCreationViewController: UIViewController, ScheduleSelectionDelegate
         return button
     }()
     
-    let maxCharacterCount = 38
+    private let maxCharacterCount = 38
     
     private lazy var symbolsLimitLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.text = "Ограничение 38 символов"
         label.font = UIFont(name: "SFPro-Regular", size: 17)
-        label.textColor = UIColor(red: 0.961, green: 0.42, blue: 0.424, alpha: 1)
+        label.textColor = .ypRed
         label.textAlignment = .center
         label.isHidden = true
         return label
     }()
     
-    let tableView: UITableView = {
+    private let tableView: UITableView = {
         let tableView = UITableView(frame: .zero, style: .plain)
         tableView.translatesAutoresizingMaskIntoConstraints = false
         let cornerRadius: CGFloat = 16.0
@@ -94,24 +92,24 @@ class TrackerCreationViewController: UIViewController, ScheduleSelectionDelegate
         return tableView
     }()
     
-    var tableViewHeightConstraint: NSLayoutConstraint!
+    private var tableViewHeightConstraint: NSLayoutConstraint?
     
-    let cancelButton: UIButton = {
+    private let cancelButton: UIButton = {
         let button = UIButton()
         button.setTitle("Отменить", for: .normal)
-        button.setTitleColor(UIColor(red: 0.961, green: 0.42, blue: 0.424, alpha: 1), for: .normal)
+        button.setTitleColor(UIColor.ypRed, for: .normal)
         button.titleLabel?.font = UIFont(name: "SFPro-Medium", size: 16)
         button.layer.cornerRadius = 16
         button.layer.borderWidth = 1
-        button.layer.borderColor = UIColor(red: 0.961, green: 0.42, blue: 0.424, alpha: 1).cgColor
+        button.layer.borderColor = UIColor.ypRed.cgColor
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
     
-    let createButton: UIButton = {
+    private let createButton: UIButton = {
         let button = UIButton()
         button.setTitle("Создать", for: .normal)
-        button.layer.backgroundColor = UIColor(red: 0.102, green: 0.106, blue: 0.133, alpha: 1).cgColor
+        button.backgroundColor = .ypBlack
         button.titleLabel?.font = UIFont(name: "SFPro-Medium", size: 16)
         button.layer.cornerRadius = 16
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -129,7 +127,6 @@ class TrackerCreationViewController: UIViewController, ScheduleSelectionDelegate
         hideKeyboardWhenTappedAround()
         setUpConstraints()
         
-        
         if isEvent {
             tableViewHeightConstraint = tableView.heightAnchor.constraint(equalToConstant: 75)
             titleLabel.text = "Новое нерегулярное событие"
@@ -138,7 +135,7 @@ class TrackerCreationViewController: UIViewController, ScheduleSelectionDelegate
         }
         nameTextField.rightView = clearButton
         nameTextField.rightViewMode = .whileEditing
-        tableViewHeightConstraint.isActive = true
+        tableViewHeightConstraint?.isActive = true
         updateCreateButtonState()
         clearButton.addTarget(self, action: #selector(clearButtonTapped), for: .touchUpInside)
         nameTextField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
@@ -297,7 +294,7 @@ extension TrackerCreationViewController: UITableViewDelegate, UITableViewDataSou
         return cell
     }
     
-    func scheduleDescription() -> String {
+    private func scheduleDescription() -> String {
         let allDaysOfWeek = Schedule.allCases
 
         if Set(schedule) == Set(allDaysOfWeek) {
@@ -308,8 +305,6 @@ extension TrackerCreationViewController: UITableViewDelegate, UITableViewDataSou
 
         return ""
     }
-    
-    
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)

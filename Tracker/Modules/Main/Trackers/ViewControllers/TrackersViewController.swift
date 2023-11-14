@@ -8,7 +8,7 @@
 import UIKit
 
 
-class TrackersViewController: UIViewController {
+final class TrackersViewController: UIViewController {
     
     private var categories: [TrackerCategory] = [
         TrackerCategory(
@@ -79,7 +79,7 @@ class TrackersViewController: UIViewController {
     private let trackersLabel: UILabel = {
         let label = UILabel()
         label.text = "Трекеры"
-        label.textColor = UIColor(red: 0.102, green: 0.106, blue: 0.133, alpha: 1)
+        label.textColor = .ypBlack
         label.font = UIFont(name: "SFPro-Bold", size: 34)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -98,7 +98,7 @@ class TrackersViewController: UIViewController {
         let label = UILabel()
         label.frame = CGRect(x: 0, y: 0, width: 343, height: 18)
         label.text = "Что будем отслеживать?"
-        label.textColor = .black
+        label.textColor = .ypBlack
         label.font = UIFont(name: "SFPro-Medium", size: 12)
         label.textAlignment = .center
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -111,7 +111,7 @@ class TrackersViewController: UIViewController {
         layout.scrollDirection = .vertical
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.register(TrackerCollectionViewCell.self, forCellWithReuseIdentifier: "TrackerCell")
-        collectionView.backgroundColor = .white
+        collectionView.backgroundColor = .ypWhite
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         return collectionView
     }()
@@ -199,7 +199,7 @@ class TrackersViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
+        view.backgroundColor = .ypWhite
         
         if let navBar = navigationController?.navigationBar {
             navBar.tintColor = UIColor.black
@@ -211,8 +211,6 @@ class TrackersViewController: UIViewController {
         }
         
         trackersCollectionView.register(SectionHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "SectionHeader")
-        
-        
         
         searchBar.placeholder = "Поиск"
         searchBar.delegate = self
