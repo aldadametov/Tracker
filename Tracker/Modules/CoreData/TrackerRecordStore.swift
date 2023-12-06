@@ -21,13 +21,36 @@ final class TrackerRecordStore {
         self.context = context
     }
 
-    func addNewTrackerRecord(_ trackerRecord: TrackerRecord) {
+    func addNewTrackerRecord(_ trackerRecord: TrackerRecord, for tracker: Tracker) {
+        guard let trackerCoreData = getTrackerCoreData(for: tracker) else {
+            print("Error: Tracker not found in Core Data.")
+            return
+        }
+
         let trackerRecordCoreData = TrackerRecordCoreData(context: context)
         updateExistingTrackerRecord(trackerRecordCoreData, with: trackerRecord)
+        
+        trackerRecordCoreData.tracker = trackerCoreData
+
+        AppDelegate.shared?.saveContext()
     }
 
     func updateExistingTrackerRecord(_ trackerRecordCoreData: TrackerRecordCoreData, with trackerRecord: TrackerRecord) {
         trackerRecordCoreData.date = trackerRecord.date
         trackerRecordCoreData.id = trackerRecord.id
     }
+
+    private func getTrackerCoreData(for tracker: Tracker) -> TrackerCoreData? {
+        let fetchRequest = NSFetchRequest<TrackerCoreData>(entityName: "TrackerCoreData")
+        fetchRequest.predicate = NSPredicate(format: "id == %@", tracker.id as CVarArg)
+
+        do {
+            let results = try context.fetch(fetchRequest)
+            return results.first
+        } catch {
+            print("Error fetching TrackerCoreData: \(error)")
+            return nil
+        }
+    }
 }
+

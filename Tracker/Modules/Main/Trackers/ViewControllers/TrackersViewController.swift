@@ -10,51 +10,11 @@ import UIKit
 
 final class TrackersViewController: UIViewController {
     
-    private var categories: [TrackerCategory] = [
-        TrackerCategory(
-            title: "Уборка",
-            trackers: [
-                Tracker(
-                    name: "Помыть посуду",
-                    color: .colorSelection[1],
-                    emoji: "💦",
-                    schedule: [.monday, .tuesday, .saturday, .friday]),
-                Tracker(
-                    name: "Запустить робот - пылесос",
-                    color: .colorSelection[2],
-                    emoji: "🤖",
-                    schedule: [.wednesday]),
-                Tracker(
-                    name: "Постирать вещи",
-                    color: .colorSelection[2],
-                    emoji: "🧺",
-                    schedule: [.wednesday])
-            ]),
-        TrackerCategory(
-            title: "Отдых",
-            trackers: [
-                Tracker(
-                    name: "Пройти СпайдерМена на Платину",
-                    color: .colorSelection[3],
-                    emoji: "🕷️",
-                    schedule: [.sunday])
-            ]),
-        TrackerCategory(
-            title: "Учёба",
-            trackers: [
-                Tracker(
-                    name: "Учить SWIFT минимум 4 часа",
-                    color: .colorSelection[4],
-                    emoji: "👨‍💻",
-                    schedule: [.tuesday]),
-                Tracker(
-                    name: "Повторять правила дорожного движения",
-                    color: .colorSelection[5],
-                    emoji: "🚗",
-                    schedule: [.saturday])
-            ]),
-    ]
-    
+
+    private let trackerStore = TrackerStore()
+    private let trackerCategoryStore = TrackerCategoryStore()
+    private let trackerRecordStore = TrackerRecordStore()
+    private var categories: [TrackerCategory] = []
     private var visibleCategories: [TrackerCategory] = []
     private var completedTrackers: [TrackerRecord] = []
     private var filteredTrackers: [TrackerCategory] = []
@@ -201,6 +161,8 @@ final class TrackersViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .ypWhite
         
+        categories = trackerCategoryStore.getAllTrackerCategories()
+        
         if let navBar = navigationController?.navigationBar {
             navBar.tintColor = UIColor.black
             let customImage = UIImage(named: "Add tracker")
@@ -211,7 +173,7 @@ final class TrackersViewController: UIViewController {
         }
         
         trackersCollectionView.register(SectionHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "SectionHeader")
-        
+        //trackerCategoryStore.delegate = self
         searchBar.placeholder = "Поиск"
         searchBar.delegate = self
         searchBar.translatesAutoresizingMaskIntoConstraints = false
@@ -230,11 +192,11 @@ final class TrackersViewController: UIViewController {
 
 extension TrackersViewController: UICollectionViewDataSource {
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return visibleCategories.count
+        return trackerCategoryStore.numberOfSections
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return visibleCategories[section].trackers.count
+        return trackerCategoryStore.numberOfItemsInSection(section)
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -243,7 +205,7 @@ extension TrackersViewController: UICollectionViewDataSource {
         cell.delegate = self
         cell.indexPath = indexPath
 
-        let currentTracker = visibleCategories[indexPath.section].trackers[indexPath.row]
+        let currentTracker = trackerCategoryStore.item(at: indexPath)
         cell.trackerCardView.backgroundColor = currentTracker.color
         cell.emojiLabel.text = currentTracker.emoji
         cell.trackerLabel.text = currentTracker.name
@@ -268,11 +230,18 @@ extension TrackersViewController: UICollectionViewDataSource {
         return cell
     }
 
+
     
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         if kind == UICollectionView.elementKindSectionHeader {
             let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "SectionHeader", for: indexPath) as! SectionHeaderView
-            headerView.titleLabel.text = visibleCategories[indexPath.section].title
+            
+            if let sectionTitle = trackerCategoryStore.sectionHeaderTitle(indexPath.section) {
+                headerView.titleLabel.text = sectionTitle
+            } else {
+                headerView.titleLabel.text = "Default Section Title" // Замените на ваш дефолтный заголовок, если нужно
+            }
+            
             return headerView
         }
         return UICollectionReusableView()
@@ -340,7 +309,6 @@ extension TrackersViewController: TrackerCellDelegate {
         
         let today = Date()
         if currentDate > today {
-            print("Вы не можете отметить трекер для будущей даты.")
             return
         }
         
@@ -371,8 +339,6 @@ extension TrackersViewController: TrackerCellDelegate {
                 cell.daysCountLabel.text = formatDaysString(daysCount)
 
                 trackersCollectionView.reloadData()
-        
-        print(completedTrackers)
     }
     
     func formatDaysString(_ days: Int) -> String {
@@ -393,30 +359,17 @@ extension TrackersViewController: TrackerCellDelegate {
 
 extension TrackersViewController: TrackerCreationDelegate {
     func didCreateTracker(_ tracker: Tracker, isEvent: Bool) {
-        let newCategory = TrackerCategory(
-            title: "Важное",
-            trackers: [tracker]
-        )
-        
-        var updatedCategories = categories.map { category -> TrackerCategory in
-            if category.title == newCategory.title {
-                return TrackerCategory(title: category.title, trackers: category.trackers + [tracker])
-            } else {
-                return category
-            }
-        }
-        
-        if !updatedCategories.contains(where: { $0.title == newCategory.title }) {
-            updatedCategories.append(newCategory)
-        }
+            let categoryTitle = "Важное"
 
-        categories = updatedCategories
-        updateVisibleCategories()
-        trackersCollectionView.reloadData()
-        showPlaceHolder()
-        
-        dismiss(animated: true)
-    }
+            if let categoryCoreData = trackerCategoryStore.getTrackerCategoryCoreData(by: categoryTitle) {
+                trackerStore.addNewTracker(tracker, to: TrackerCategory(title: categoryTitle, trackers: []))
+            } else {
+                trackerCategoryStore.addNewTrackerCategory(title: categoryTitle, trackers: [tracker])
+            }
+            trackerCategoryStore.printAllTrackerCategories()
+            
+            dismiss(animated: true)
+        }
 }
 
 

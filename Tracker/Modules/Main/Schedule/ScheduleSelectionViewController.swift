@@ -107,7 +107,6 @@ final class ScheduleSelectionViewController: UIViewController {
     @objc private func doneButtonTapped() {
             delegate?.didSelectSchedule(selectedDays)
             navigationController?.popViewController(animated: true)
-            print("Выбранные дни переданы: \(selectedDays)")
         }
 }
 
@@ -147,7 +146,6 @@ extension ScheduleSelectionViewController: UITableViewDelegate, UITableViewDataS
                     self.selectedDays.remove(at: index)
                 }
             }
-            print("Selected days after toggling: \(self.selectedDays)")
         }
         
         return cell
