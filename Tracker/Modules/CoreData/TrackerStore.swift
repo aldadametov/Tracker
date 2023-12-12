@@ -16,10 +16,39 @@ enum TrackerStoreError: Error {
     case decodingErrorInvalidSchedule
 }
 
+struct TrackerStoreUpdate {
+    struct Move: Hashable {
+        let oldIndex: Int
+        let newIndex: Int
+    }
+    let insertedIndexes: IndexSet
+    let deletedIndexes: IndexSet
+    let updatedIndexes: IndexSet
+    let movedIndexes: Set<Move>
+    let insertedSections: IndexSet
+    let deletedSections: IndexSet
+}
+
+protocol TrackerStoreDelegate: AnyObject {
+    func store(
+        _ store: TrackerStore,
+        didUpdate update: TrackerStoreUpdate
+    )
+}
 
 final class TrackerStore: NSObject {
     private let context: NSManagedObjectContext
+    private var fetchedResultsController: NSFetchedResultsController<TrackerCoreData>!
+    weak var delegate: TrackerStoreDelegate?
     
+    private var insertedIndexes: IndexSet?
+    private var deletedIndexes: IndexSet?
+    private var updatedIndexes: IndexSet?
+    private var movedIndexes: Set<TrackerStoreUpdate.Move>?
+    private var insertedSections: IndexSet?
+    private var deletedSections: IndexSet?
+    
+
     convenience override init() {
         let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
         try! self.init(context: context)
@@ -28,6 +57,17 @@ final class TrackerStore: NSObject {
     init(context: NSManagedObjectContext) throws {
         self.context = context
         super.init()
+        
+        let fetchRequest = TrackerCoreData.fetchRequest()
+        fetchRequest.sortDescriptors = [ NSSortDescriptor(keyPath: \TrackerCoreData.category, ascending: true) ]
+        
+        let controller = NSFetchedResultsController(fetchRequest: fetchRequest,
+                                                    managedObjectContext: context,
+                                                    sectionNameKeyPath: "category",
+                                                    cacheName: nil)
+        controller.delegate = self
+        self.fetchedResultsController = controller
+        try controller.performFetch()
     }
 
     
@@ -89,24 +129,148 @@ final class TrackerStore: NSObject {
             return nil
         }
     }
+}
+
+//MARK: UIcollectionviewDataSource
+
+extension TrackerStore {
     
-    func printAllTrackersFromCoreData() {
-        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "TrackerCoreData")
-        do {
-            let trackers = try context.fetch(fetchRequest) as! [TrackerCoreData]
-            for tracker in trackers {
-                guard let id = tracker.id else {throw TrackerStoreError.decodingErroeInvalidId}
-                let name = tracker.name ?? "N/A"
-                let color = tracker.color
-                let emoji = tracker.emoji ?? "N/A"
-                guard let schedule = tracker.schedule else { throw TrackerStoreError.decodingErrorInvalidSchedule }
-                
-                print("ID: \(id), Name: \(name), Color: \(String(describing: color)), Emoji: \(emoji), Schedule: \(String(describing: schedule))")
+    func filteredTrackers(for currentDate: Date) -> [TrackerCategory] {
+        guard let sections = fetchedResultsController.sections else { return [] }
+
+        var filteredCategories = [TrackerCategory]()
+
+        for section in sections {
+            let categoryTitle = section.name
+            let trackersInCategory = section.objects as? [TrackerCoreData] ?? []
+
+            let filteredTrackers = trackersInCategory.compactMap { trackerCoreData -> Tracker? in
+                guard let schedule = trackerCoreData.schedule as? [Schedule],
+                      let selectedDay = getDayOfWeek(currentDate),
+                      schedule.contains(selectedDay) else {
+                    return nil
+                }
+                return try? tracker(from: trackerCoreData)
             }
-        } catch {
-            print("Failed to fetch trackers from CoreData: \(error)")
+
+            if !filteredTrackers.isEmpty {
+                let category = TrackerCategory(title: categoryTitle, trackers: filteredTrackers)
+                filteredCategories.append(category)
+            }
+        }
+
+        return filteredCategories
+    }
+
+    
+    func sectionHeaderTitle(_ section: Int) -> String? {
+        guard let sectionInfo = fetchedResultsController.sections?[section] as? NSFetchedResultsSectionInfo else { return nil }
+        
+        // Получаем первый объект в секции
+        if let firstObject = sectionInfo.objects?.first as? TrackerCoreData,
+           let category = firstObject.category,
+           let categoryName = category.title {
+            return categoryName
+        }
+        
+        return nil
+    }
+    
+    func tracker(for indexPath: IndexPath, currentDate: Date) -> Tracker? {
+        guard let sectionInfo = fetchedResultsController.sections?[indexPath.section],
+              let trackerCoreData = sectionInfo.objects?[indexPath.row] as? TrackerCoreData,
+              let schedule = trackerCoreData.schedule as? [Schedule],
+              let selectedDay = getDayOfWeek(currentDate) else {
+            return nil
+        }
+
+        if schedule.contains(selectedDay) {
+            return try? tracker(from: trackerCoreData)
+        } else {
+            return nil
+        }
+    }
+
+    func getDayOfWeek(_ date: Date) -> Schedule? {
+        let calendar = Calendar.current
+        let dayOfWeek = calendar.component(.weekday, from: date)
+        return Schedule(rawValue: dayOfWeek)
+    }
+
+}
+
+extension TrackerStore: NSFetchedResultsControllerDelegate {
+    func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        insertedIndexes = IndexSet()
+        deletedIndexes = IndexSet()
+        updatedIndexes = IndexSet()
+        movedIndexes = Set<TrackerStoreUpdate.Move>()
+        insertedSections = IndexSet()
+        deletedSections = IndexSet ()
+    }
+
+    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        delegate?.store(
+            self,
+            didUpdate: TrackerStoreUpdate(
+                insertedIndexes: insertedIndexes ?? IndexSet(),
+                deletedIndexes: deletedIndexes ?? IndexSet(),
+                updatedIndexes: updatedIndexes ?? IndexSet(),
+                movedIndexes: movedIndexes ?? Set<TrackerStoreUpdate.Move>(),
+                insertedSections: insertedSections ?? IndexSet(),
+                deletedSections: deletedSections ?? IndexSet()
+            )
+        )
+        insertedIndexes = nil
+        deletedIndexes = nil
+        updatedIndexes = nil
+        movedIndexes = nil
+        insertedSections = nil
+        deletedSections = nil
+    }
+
+    func controller(
+        _ controller: NSFetchedResultsController<NSFetchRequestResult>,
+        didChange anObject: Any,
+        at indexPath: IndexPath?,
+        for type: NSFetchedResultsChangeType,
+        newIndexPath: IndexPath?
+    ) {
+        switch type {
+        case .insert:
+            guard let indexPath = newIndexPath else { fatalError() }
+            insertedIndexes?.insert(indexPath.item)
+        case .delete:
+            guard let indexPath = indexPath else { fatalError() }
+            deletedIndexes?.insert(indexPath.item)
+        case .update:
+            guard let indexPath = indexPath else { fatalError() }
+            updatedIndexes?.insert(indexPath.item)
+        case .move:
+            guard let oldIndexPath = indexPath, let newIndexPath = newIndexPath else { fatalError() }
+            movedIndexes?.insert(.init(oldIndex: oldIndexPath.item, newIndex: newIndexPath.item))
+        @unknown default:
+            fatalError()
         }
     }
     
-    
+    func controller(
+        _ controller: NSFetchedResultsController<NSFetchRequestResult>,
+        didChange sectionInfo: NSFetchedResultsSectionInfo,
+        atSectionIndex sectionIndex: Int,
+        for type: NSFetchedResultsChangeType
+    ) {
+        switch type {
+        case .insert:
+            insertedSections?.insert(sectionIndex)
+        case .delete:
+            deletedSections?.insert(sectionIndex)
+        // Мы не обрабатываем .update и .move для секций, поскольку они редко используются в этом контексте
+        default:
+            break
+        }
+    }
 }
+
+
+

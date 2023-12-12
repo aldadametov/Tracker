@@ -11,39 +11,39 @@ import CoreData
 
 final class TrackerRecordStore {
     private let context: NSManagedObjectContext
-
+    
     convenience init() {
         let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
         self.init(context: context)
     }
-
+    
     init(context: NSManagedObjectContext) {
         self.context = context
     }
-
+    
     func addNewTrackerRecord(_ trackerRecord: TrackerRecord, for tracker: Tracker) {
         guard let trackerCoreData = getTrackerCoreData(for: tracker) else {
             print("Error: Tracker not found in Core Data.")
             return
         }
-
+        
         let trackerRecordCoreData = TrackerRecordCoreData(context: context)
         updateExistingTrackerRecord(trackerRecordCoreData, with: trackerRecord)
         
         trackerRecordCoreData.tracker = trackerCoreData
-
+        
         AppDelegate.shared?.saveContext()
     }
-
+    
     func updateExistingTrackerRecord(_ trackerRecordCoreData: TrackerRecordCoreData, with trackerRecord: TrackerRecord) {
         trackerRecordCoreData.date = trackerRecord.date
         trackerRecordCoreData.id = trackerRecord.id
     }
-
+    
     private func getTrackerCoreData(for tracker: Tracker) -> TrackerCoreData? {
         let fetchRequest = NSFetchRequest<TrackerCoreData>(entityName: "TrackerCoreData")
         fetchRequest.predicate = NSPredicate(format: "id == %@", tracker.id as CVarArg)
-
+        
         do {
             let results = try context.fetch(fetchRequest)
             return results.first
@@ -52,5 +52,39 @@ final class TrackerRecordStore {
             return nil
         }
     }
+    
+    func deleteTrackerRecord(for tracker: Tracker, on date: Date) {
+        guard let trackerCoreData = getTrackerCoreData(for: tracker) else {
+            print("Error: Tracker not found in Core Data.")
+            return
+        }
+        
+        let fetchRequest = NSFetchRequest<TrackerRecordCoreData>(entityName: "TrackerRecordCoreData")
+        fetchRequest.predicate = NSPredicate(format: "tracker == %@ AND date == %@", trackerCoreData, date as CVarArg)
+        
+        do {
+            let results = try context.fetch(fetchRequest)
+            for record in results {
+                context.delete(record)
+            }
+            AppDelegate.shared?.saveContext()
+        } catch {
+            print("Error deleting TrackerRecordCoreData: \(error)")
+        }
+    }
+    
+    func printAllTrackerRecords() {
+        let fetchRequest = NSFetchRequest<TrackerRecordCoreData>(entityName: "TrackerRecordCoreData")
+
+        do {
+            let records = try context.fetch(fetchRequest)
+            for record in records {
+                print("Tracker Record: \(String(describing: record.id)) - Date: \(String(describing: record.date))")
+            }
+        } catch {
+            print("Error fetching TrackerRecordCoreData: \(error)")
+        }
+    }
 }
+
 

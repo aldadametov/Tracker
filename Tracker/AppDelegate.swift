@@ -2,6 +2,7 @@ import UIKit
 import CoreData
 
 @main
+
 final class AppDelegate: UIResponder, UIApplicationDelegate {
     
     static var shared: AppDelegate? {
@@ -28,7 +29,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         configuration.delegateClass = SceneDelegate.self
         return configuration
     }
-    
+
     // MARK: - Core Data stack
 
     lazy var persistentContainer: NSPersistentContainer = {
