@@ -17,6 +17,8 @@ final class TrackersViewController: UIViewController {
     private var completedTrackers: [TrackerRecord] = []
     private var filteredTrackers: [TrackerCategory] = []
     private var currentDate: Date = Date()
+    private var searchResults: [TrackerCategory] = []
+    private var isSearchActive: Bool = false
     
     private lazy var datePicker: UIDatePicker = {
         let datePicker = UIDatePicker()
@@ -40,7 +42,7 @@ final class TrackersViewController: UIViewController {
         return label
     }()
     
-    private let noTrackersImageView: UIImageView = {
+    private let noTrackersCreatedImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.image = UIImage(named: "noTrackersSet")
         imageView.contentMode = .scaleAspectFit
@@ -49,10 +51,31 @@ final class TrackersViewController: UIViewController {
         return imageView
     }()
     
-    private let noTrackersLabel: UILabel  = {
+    private let noTrackersCreatedLabel: UILabel  = {
         let label = UILabel()
         label.frame = CGRect(x: 0, y: 0, width: 343, height: 18)
         label.text = "Что будем отслеживать?"
+        label.textColor = .ypBlack
+        label.font = UIFont(name: "SFPro-Medium", size: 12)
+        label.textAlignment = .center
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.isHidden = true
+        return label
+    } ()    
+    
+    private let noTrackersFoundImageView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.image = UIImage(named: "noTrackersFound")
+        imageView.contentMode = .scaleAspectFit
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        imageView.isHidden = true
+        return imageView
+    }()
+    
+    private let noTrackersFoundLabel: UILabel  = {
+        let label = UILabel()
+        label.frame = CGRect(x: 0, y: 0, width: 343, height: 18)
+        label.text = "Ничего не найдено"
         label.textColor = .ypBlack
         label.font = UIFont(name: "SFPro-Medium", size: 12)
         label.textAlignment = .center
@@ -71,18 +94,29 @@ final class TrackersViewController: UIViewController {
         return collectionView
     }()
     
-    //    private func showPlaceHolder() {
-    //        if visibleCategories.isEmpty {
-    //            noTrackersLabel.isHidden = false
-    //            noTrackersImageView.isHidden = false
-    //            trackersCollectionView.isHidden = true
-    //        } else {
-    //            noTrackersLabel.isHidden = true
-    //            noTrackersImageView.isHidden = true
-    //            trackersCollectionView.isHidden = false
-    //        }
-    //    }
+    private func showPlaceholder() {
+        // Показывать плейсхолдер только если поиск не активен
+        if !isSearchActive {
+            let hasTrackers = !trackerStore.filteredTrackers(for: currentDate).isEmpty
+
+            noTrackersCreatedLabel.isHidden = hasTrackers
+            noTrackersCreatedImageView.isHidden = hasTrackers
+            trackersCollectionView.isHidden = !hasTrackers
+        } else {
+            // Если поиск активен, скрыть плейсхолдеры, связанные с отсутствием трекеров
+            noTrackersCreatedLabel.isHidden = true
+            noTrackersCreatedImageView.isHidden = true
+            // Не изменять видимость trackersCollectionView, так как она должна отображать результаты поиска
+        }
+    }
     
+    private func showNoResultsPlaceholder() {
+        let shouldShowNoResultsPlaceholder = isSearchActive && searchResults.isEmpty
+
+        noTrackersFoundLabel.isHidden = !shouldShowNoResultsPlaceholder
+        noTrackersFoundImageView.isHidden = !shouldShowNoResultsPlaceholder
+        trackersCollectionView.isHidden = shouldShowNoResultsPlaceholder
+    }
     @objc func addTrackerButtonTapped() {
         let trackerTypeSelectionVC = TrackerTypeSelectionViewController()
         trackerTypeSelectionVC.delegate = self // Устанавливаем делегата на себя
@@ -97,13 +131,16 @@ final class TrackersViewController: UIViewController {
         let localDate = calendar.startOfDay(for: selectedDate)
         currentDate = localDate
         trackersCollectionView.reloadData()
+        showPlaceholder()
     }
     
     private func addSubViews() {
         view.addSubview(searchBar)
         view.addSubview(trackersLabel)
-        view.addSubview(noTrackersImageView)
-        view.addSubview(noTrackersLabel)
+        view.addSubview(noTrackersCreatedImageView)
+        view.addSubview(noTrackersCreatedLabel)        
+        view.addSubview(noTrackersFoundImageView)
+        view.addSubview(noTrackersFoundLabel)
         view.addSubview(trackersCollectionView)
     }
     
@@ -114,16 +151,26 @@ final class TrackersViewController: UIViewController {
             searchBar.topAnchor.constraint(equalTo: view.topAnchor, constant: 136),
             searchBar.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 10),
             searchBar.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -10),
-            noTrackersImageView.topAnchor.constraint(equalTo: view.topAnchor, constant: 402),
-            noTrackersImageView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -330),
-            noTrackersImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            noTrackersImageView.widthAnchor.constraint(equalToConstant: 80),
-            noTrackersImageView.heightAnchor.constraint(equalToConstant: 80),
-            noTrackersLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 490),
-            noTrackersLabel.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -304),
-            noTrackersLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            noTrackersLabel.widthAnchor.constraint(equalToConstant: 343),
-            noTrackersLabel.heightAnchor.constraint(equalToConstant: 18),
+            noTrackersCreatedImageView.topAnchor.constraint(equalTo: view.topAnchor, constant: 402),
+            noTrackersCreatedImageView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -330),
+            noTrackersCreatedImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            noTrackersCreatedImageView.widthAnchor.constraint(equalToConstant: 80),
+            noTrackersCreatedImageView.heightAnchor.constraint(equalToConstant: 80),
+            noTrackersCreatedLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 490),
+            noTrackersCreatedLabel.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -304),
+            noTrackersCreatedLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            noTrackersCreatedLabel.widthAnchor.constraint(equalToConstant: 343),
+            noTrackersCreatedLabel.heightAnchor.constraint(equalToConstant: 18),
+            noTrackersFoundImageView.topAnchor.constraint(equalTo: view.topAnchor, constant: 402),
+            noTrackersFoundImageView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -330),
+            noTrackersFoundImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            noTrackersFoundImageView.widthAnchor.constraint(equalToConstant: 80),
+            noTrackersFoundImageView.heightAnchor.constraint(equalToConstant: 80),
+            noTrackersFoundLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 490),
+            noTrackersFoundLabel.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -304),
+            noTrackersFoundLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            noTrackersFoundLabel.widthAnchor.constraint(equalToConstant: 343),
+            noTrackersFoundLabel.heightAnchor.constraint(equalToConstant: 18),
             trackersCollectionView.topAnchor.constraint(equalTo: searchBar.bottomAnchor, constant: 10),
             trackersCollectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             trackersCollectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
@@ -148,7 +195,7 @@ final class TrackersViewController: UIViewController {
         trackersCollectionView.register(SectionHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "SectionHeader")
         
         searchBar.placeholder = "Поиск"
-        //searchBar.delegate = self
+        searchBar.delegate = self
         searchBar.translatesAutoresizingMaskIntoConstraints = false
         searchBar.backgroundImage = UIImage()
         trackersCollectionView.delegate = self
@@ -157,6 +204,7 @@ final class TrackersViewController: UIViewController {
         addSubViews()
         setUpConstraints()
         hideKeyboardWhenTappedAround()
+        showPlaceholder()
     }
 }
 
@@ -165,11 +213,11 @@ final class TrackersViewController: UIViewController {
 
 extension TrackersViewController: UICollectionViewDataSource {
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return trackerStore.filteredTrackers(for: currentDate).count
+        return isSearchActive ? searchResults.count : trackerStore.filteredTrackers(for: currentDate).count
     }
-    
+
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        let categories = trackerStore.filteredTrackers(for: currentDate)
+        let categories = isSearchActive ? searchResults : trackerStore.filteredTrackers(for: currentDate)
         return categories[section].trackers.count
     }
     
@@ -177,9 +225,8 @@ extension TrackersViewController: UICollectionViewDataSource {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "TrackerCell", for: indexPath) as! TrackerCollectionViewCell
         
         //cell.delegate = self
-        let filteredCategories = trackerStore.filteredTrackers(for: currentDate)
-        let section = filteredCategories[indexPath.section]
-        let currentTracker = section.trackers[indexPath.row]
+        let categories = isSearchActive ? searchResults : trackerStore.filteredTrackers(for: currentDate)
+        let currentTracker = categories[indexPath.section].trackers[indexPath.row]
         
         cell.trackerCardView.backgroundColor = currentTracker.color
         cell.emojiLabel.text = currentTracker.emoji
@@ -246,26 +293,29 @@ extension TrackersViewController: UICollectionViewDelegateFlowLayout {
 
 //MARK: - UISearchBarDelegate
 
-//extension TrackersViewController: UISearchBarDelegate {
-//    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-//        if searchText.isEmpty {
-//            updateVisibleCategories()
-//        } else {
-//            filteredTrackers = categories.compactMap { category in
-//                let matchingTrackers = category.trackers.filter { $0.name.lowercased().contains(searchText.lowercased()) }
-//                return matchingTrackers.isEmpty ? nil : TrackerCategory(title: category.title, trackers: matchingTrackers)
-//            }
-//            visibleCategories = filteredTrackers
-//        }
-//
-//        trackersCollectionView.reloadData()
-//        showPlaceHolder()
-//    }
-//
-//    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-//        searchBar.resignFirstResponder()
-//    }
-//}
+extension TrackersViewController: UISearchBarDelegate {
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        if searchText.isEmpty {
+            isSearchActive = false
+        } else {
+            isSearchActive = true
+            // Вместо fetchAllTrackers используйте метод, который извлекает все трекеры
+            let allTrackers = trackerStore.fetchAllTrackers()
+            searchResults = allTrackers.compactMap { category in
+                let matchingTrackers = category.trackers.filter { $0.name.lowercased().contains(searchText.lowercased()) }
+                return matchingTrackers.isEmpty ? nil : TrackerCategory(title: category.title, trackers: matchingTrackers)
+            }
+        }
+
+        trackersCollectionView.reloadData()
+        showPlaceholder()
+        showNoResultsPlaceholder()
+    }
+
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        searchBar.resignFirstResponder()
+    }
+}
 
 
 

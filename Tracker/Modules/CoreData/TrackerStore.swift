@@ -196,6 +196,22 @@ extension TrackerStore {
         let dayOfWeek = calendar.component(.weekday, from: date)
         return Schedule(rawValue: dayOfWeek)
     }
+    
+    func fetchAllTrackers() -> [TrackerCategory] {
+        guard let sections = fetchedResultsController.sections else { return [] }
+
+        var allCategories = [TrackerCategory]()
+
+        for section in sections {
+            let categoryTitle = section.name
+            let trackersInCategory = (section.objects as? [TrackerCoreData] ?? []).compactMap { try? tracker(from: $0) }
+
+            let category = TrackerCategory(title: categoryTitle, trackers: trackersInCategory)
+            allCategories.append(category)
+        }
+
+        return allCategories
+    }
 
 }
 
