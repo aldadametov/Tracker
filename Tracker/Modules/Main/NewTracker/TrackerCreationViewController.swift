@@ -288,7 +288,8 @@ final class TrackerCreationViewController: UIViewController, ScheduleSelectionDe
     }
     
     @objc private func createButtonTapped() {
-        let newTracker = Tracker(name: nameTextField.text ?? "", 
+        let newTracker = Tracker(id: UUID(),
+                                 name: nameTextField.text ?? "",
                                  color: selectedColor,
                                  emoji: selectedEmoji,
                                  schedule: isEvent ? [.monday, .tuesday, .thursday, .wednesday, .friday, .saturday, .sunday] : schedule)

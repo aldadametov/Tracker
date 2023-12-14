@@ -88,6 +88,7 @@ final class TrackerStore: NSObject {
             throw TrackerStoreError.decodingErrorInvalidSchedule
         }
         return Tracker(
+            id: id,
             name: name,
             color: color as? UIColor,
             emoji: emoji,
@@ -166,7 +167,6 @@ extension TrackerStore {
     func sectionHeaderTitle(_ section: Int) -> String? {
         guard let sectionInfo = fetchedResultsController.sections?[section] as? NSFetchedResultsSectionInfo else { return nil }
         
-        // Получаем первый объект в секции
         if let firstObject = sectionInfo.objects?.first as? TrackerCoreData,
            let category = firstObject.category,
            let categoryName = category.title {
@@ -212,7 +212,6 @@ extension TrackerStore {
 
         return allCategories
     }
-
 }
 
 extension TrackerStore: NSFetchedResultsControllerDelegate {
@@ -281,7 +280,6 @@ extension TrackerStore: NSFetchedResultsControllerDelegate {
             insertedSections?.insert(sectionIndex)
         case .delete:
             deletedSections?.insert(sectionIndex)
-        // Мы не обрабатываем .update и .move для секций, поскольку они редко используются в этом контексте
         default:
             break
         }
