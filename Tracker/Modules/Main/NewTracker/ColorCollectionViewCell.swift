@@ -8,7 +8,7 @@
 import UIKit
 
 class ColorCollectionViewCell: UICollectionViewCell {
-    private let colorView: UIView = {
+    private lazy var colorView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
         view.layer.cornerRadius = 8

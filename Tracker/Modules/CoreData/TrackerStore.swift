@@ -51,15 +51,25 @@ final class TrackerStore: NSObject {
 
     convenience override init() {
         let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-        try! self.init(context: context)
+        do {
+            try self.init(context: context)
+        } catch {
+            assertionFailure("Ошибка инициализации TrackerStore: \(error)")
+            self.init(fallbackContext: context)
+        }
     }
-    
+
+    init(fallbackContext: NSManagedObjectContext) {
+        self.context = fallbackContext
+        super.init()
+    }
+
     init(context: NSManagedObjectContext) throws {
         self.context = context
         super.init()
         
         let fetchRequest = TrackerCoreData.fetchRequest()
-        fetchRequest.sortDescriptors = [ NSSortDescriptor(keyPath: \TrackerCoreData.category, ascending: true) ]
+        fetchRequest.sortDescriptors = [NSSortDescriptor(keyPath: \TrackerCoreData.category, ascending: true)]
         
         let controller = NSFetchedResultsController(fetchRequest: fetchRequest,
                                                     managedObjectContext: context,
@@ -69,7 +79,6 @@ final class TrackerStore: NSObject {
         self.fetchedResultsController = controller
         try controller.performFetch()
     }
-
     
     func tracker(from trackerCoreData: TrackerCoreData) throws -> Tracker {
         guard let id = trackerCoreData.id else {

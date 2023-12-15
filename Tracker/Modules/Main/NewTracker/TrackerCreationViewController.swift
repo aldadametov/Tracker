@@ -129,7 +129,7 @@ final class TrackerCreationViewController: UIViewController, ScheduleSelectionDe
     private let createButton: UIButton = {
         let button = UIButton()
         button.setTitle("Создать", for: .normal)
-        button.backgroundColor = .ypBlack
+        button.backgroundColor = .ypGray
         button.titleLabel?.font = UIFont(name: "SFPro-Medium", size: 16)
         button.layer.cornerRadius = 16
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -273,7 +273,9 @@ final class TrackerCreationViewController: UIViewController, ScheduleSelectionDe
         let isEmojiSelected = !selectedEmoji.isEmpty
         let isColorSelected = selectedColor != .clear
 
-        createButton.isEnabled = !isNameTextFieldEmpty && isScheduleSelected && isEmojiSelected && isColorSelected
+        let isButtonEnabled = !isNameTextFieldEmpty && isScheduleSelected && isEmojiSelected && isColorSelected
+        createButton.isEnabled = isButtonEnabled
+        createButton.backgroundColor = isButtonEnabled ? .ypBlack : .ypGray
     }
 
     
