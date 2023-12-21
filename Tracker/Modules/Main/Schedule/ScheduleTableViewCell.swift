@@ -51,7 +51,6 @@ final class ScheduleTableViewCell: UITableViewCell {
     
     @objc func switchToggled(_ sender: UISwitch) {
         toggleSwitchAction?(sender.isOn)
-        print("Toggle switch state changed to: \(sender.isOn)")
     }
 }
 
