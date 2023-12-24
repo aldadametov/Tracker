@@ -7,9 +7,9 @@
 
 import UIKit
 
-class RedBackgroundVC: UIViewController {
+final class RedBackgroundVC: UIViewController {
     
-    let backgroundView: UIImageView = {
+    private let backgroundView: UIImageView = {
         let view = UIImageView()
         let image = UIImage(named: "redBackground")
         view.image = image
@@ -17,7 +17,7 @@ class RedBackgroundVC: UIViewController {
         return view
     }()
     
-    let onboardingLabel: UILabel = {
+    private let onboardingLabel: UILabel = {
         let label = UILabel()
         label.text = "Даже если это не литры воды и йога"
         label.font = UIFont(name: "SFPro-Bold", size: 32)

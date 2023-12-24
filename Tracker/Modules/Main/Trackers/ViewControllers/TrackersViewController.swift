@@ -358,14 +358,11 @@ extension TrackersViewController: TrackerCellDelegate {
 //MARK: - TrackerViewControllerDelegate
 
 extension TrackersViewController: TrackerCreationDelegate {
-    func didCreateTracker(_ tracker: Tracker, isEvent: Bool) {
-        let categoryTitle = "Важное"
-        
-        if let categoryCoreData = trackerStore.getTrackerCategoryCoreData(by: categoryTitle) {
-            trackerStore.addNewTracker(tracker, to: TrackerCategory(title: categoryTitle, trackers: []))
-        } else {
-            trackerCategoryStore.addNewTrackerCategory(title: categoryTitle, trackers: [tracker])
-        }
+    
+    func didCreateTracker(_ tracker: Tracker, category: TrackerCategory, isEvent: Bool) {
+        let categoryTitle = category.title
+        trackerStore.addNewTracker(tracker, to: TrackerCategory(title: categoryTitle, trackers: []))
+        trackerCategoryStore.printAllCategories()
         dismiss(animated: true)
     }
 }

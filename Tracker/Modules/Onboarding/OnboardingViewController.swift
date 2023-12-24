@@ -7,16 +7,16 @@
 
 import UIKit
 
-class OnboardingViewController: UIPageViewController, UIPageViewControllerDataSource, UIPageViewControllerDelegate {
+final class OnboardingViewController: UIPageViewController, UIPageViewControllerDataSource, UIPageViewControllerDelegate {
     
-    lazy var pages: [UIViewController] = {
+    private lazy var pages: [UIViewController] = {
         let blueVC = BlueBackgroundVC()
         let redVC = RedBackgroundVC()
         
         return [blueVC, redVC]
     }()
     
-    lazy var pageControl: UIPageControl = {
+    private lazy var pageControl: UIPageControl = {
         let pageControl = UIPageControl()
         pageControl.numberOfPages = pages.count
         pageControl.currentPage = 0

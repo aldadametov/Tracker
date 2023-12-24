@@ -7,9 +7,9 @@
 
 import UIKit
 
-class BlueBackgroundVC: UIViewController {
+final class BlueBackgroundVC: UIViewController {
     
-    let backgroundView: UIImageView = {
+    private let backgroundView: UIImageView = {
         let view = UIImageView()
         let image = UIImage(named: "blueBackground")
         view.image = image
@@ -17,7 +17,7 @@ class BlueBackgroundVC: UIViewController {
         return view
     }()
     
-    let onboardingLabel: UILabel = {
+    private let onboardingLabel: UILabel = {
         let label = UILabel()
         label.text = "Отслеживайте только то, что хотите"
         label.font = UIFont(name: "SFPro-Bold", size: 32)
