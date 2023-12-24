@@ -74,7 +74,7 @@ final class TrackerCreationViewController: UIViewController, ScheduleSelectionDe
         button.setImage(UIImage(systemName: "xmark.circle.fill")?.withRenderingMode(.alwaysTemplate), for: .normal)
         button.tintColor = .lightGray
         button.frame = CGRect(x: 0, y: 0, width: 20, height: 20)
-        button.contentEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 12) // добавленный отступ влево
+        button.contentEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 12)
         button.contentMode = .scaleAspectFit
         button.isHidden = true
         return button

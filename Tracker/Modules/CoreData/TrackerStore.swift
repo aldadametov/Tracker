@@ -126,7 +126,7 @@ final class TrackerStore: NSObject {
         trackerCoreData.color = tracker.color
         trackerCoreData.emoji = tracker.emoji
         trackerCoreData.schedule = tracker.schedule as NSObject
-        trackerCoreData.category = category // Устанавливаем связь с категорией
+        trackerCoreData.category = category
     }
     
     

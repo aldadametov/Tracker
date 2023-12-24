@@ -213,7 +213,6 @@ extension CategorySelectionViewController: UITableViewDelegate {
         let selectedCategory = viewModel.categoryTitles[indexPath.row]
         delegate?.categorySelected(selectedCategory)
 
-        // Закрыть экран после выбора категории
         self.navigationController?.popViewController(animated: true)
     }
 

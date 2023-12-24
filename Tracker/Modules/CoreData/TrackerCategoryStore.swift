@@ -27,7 +27,6 @@ final class TrackerCategoryStore: NSObject {
         categoryCoreData.title = title
         
         trackers.forEach { tracker in
-            print("Adding tracker to category \(title): \(tracker.name)")
             let trackerCoreData = TrackerCoreData(context: context)
             trackerCoreData.id = tracker.id
             trackerCoreData.name = tracker.name
@@ -40,7 +39,6 @@ final class TrackerCategoryStore: NSObject {
         
         do {
             try context.save()
-            print("Context saved successfully")
         } catch {
             print("Error saving context: \(error)")
         }
@@ -55,19 +53,6 @@ final class TrackerCategoryStore: NSObject {
         } catch {
             print("Error fetching categories: \(error)")
             return []
-        }
-    }
-    
-    func printAllCategories() {
-        let fetchRequest: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
-
-        do {
-            let categories = try context.fetch(fetchRequest)
-            categories.forEach { category in
-                print("Category: \(category.title ?? "unknown title")")
-            }
-        } catch {
-            print("Error fetching categories: \(error)")
         }
     }
 }

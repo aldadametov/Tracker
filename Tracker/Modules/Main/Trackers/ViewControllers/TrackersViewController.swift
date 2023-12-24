@@ -112,7 +112,7 @@ final class TrackersViewController: UIViewController {
     }
     @objc func addTrackerButtonTapped() {
         let trackerTypeSelectionVC = TrackerTypeSelectionViewController()
-        trackerTypeSelectionVC.delegate = self // Устанавливаем делегата на себя
+        trackerTypeSelectionVC.delegate = self 
         let navController = UINavigationController(rootViewController: trackerTypeSelectionVC)
         present(navController, animated: true, completion: nil)
     }
@@ -123,7 +123,6 @@ final class TrackersViewController: UIViewController {
         let calendar = Calendar.current
         let localDate = calendar.startOfDay(for: selectedDate)
         currentDate = localDate
-        print("Date Picker changed: \(currentDate)")
         trackersCollectionView.reloadData()
         showPlaceholder()
     }
@@ -329,11 +328,9 @@ extension TrackersViewController: TrackerCellDelegate {
         
         if isCompleted {
             print("Deleting tracker record for \(selectedTracker.id)")
-            // Удаляем запись о выполнении трекера
             trackerRecordStore.deleteTrackerRecord(for: selectedTracker, on: currentDate)
         } else {
             print("Adding new tracker record for \(selectedTracker.id)")
-            // Добавляем новую запись о выполнении трекера
             let newRecord = TrackerRecord(id: selectedTracker.id, date: currentDate)
             trackerRecordStore.addNewTrackerRecord(newRecord, for: selectedTracker)
         }
@@ -362,7 +359,6 @@ extension TrackersViewController: TrackerCreationDelegate {
     func didCreateTracker(_ tracker: Tracker, category: TrackerCategory, isEvent: Bool) {
         let categoryTitle = category.title
         trackerStore.addNewTracker(tracker, to: TrackerCategory(title: categoryTitle, trackers: []))
-        trackerCategoryStore.printAllCategories()
         dismiss(animated: true)
     }
 }
