@@ -364,8 +364,8 @@ extension TrackerCreationViewController: UITableViewDelegate, UITableViewDataSou
         } else {
             let categorySelectionVC = CategorySelectionViewController()
             let savedCategory = UserDefaults.standard.string(forKey: "selectedCategory") ?? ""
-            categorySelectionVC.delegate = self
             categorySelectionVC.savedCategory = savedCategory
+            categorySelectionVC.viewModel.delegate = self
             self.navigationController?.pushViewController(categorySelectionVC, animated: true)
         }
     }

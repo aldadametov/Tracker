@@ -7,18 +7,11 @@
 
 import UIKit
 
-protocol CategorySelectionDelegate: AnyObject {
-    func categorySelected (_ category: String)
-}
-
 final class CategorySelectionViewController: UIViewController {
     
-    weak var delegate: CategorySelectionDelegate?
-    
-    private let viewModel: CategorySelectionViewModel
+    let viewModel: CategorySelectionViewModel
     
     var savedCategory: String?
-
     
     init() {
         let categoryStore = TrackerCategoryStore()
@@ -48,7 +41,6 @@ final class CategorySelectionViewController: UIViewController {
         imageView.image = UIImage(named: "noTrackersSet")
         imageView.contentMode = .scaleAspectFit
         imageView.translatesAutoresizingMaskIntoConstraints = false
-        //imageView.isHidden = true
         return imageView
     }()
     
@@ -61,7 +53,6 @@ final class CategorySelectionViewController: UIViewController {
         label.numberOfLines = 2
         label.lineBreakMode = .byWordWrapping
         label.translatesAutoresizingMaskIntoConstraints = false
-        //label.isHidden = true
         return label
     } ()
     
@@ -104,7 +95,9 @@ final class CategorySelectionViewController: UIViewController {
                 self?.updatePlaceholderVisibility()
             }
         }
-        
+        viewModel.onCategorySelected = { [weak self] selectedCategory in
+            self?.navigationController?.popViewController(animated: true)
+        }
         viewModel.fetchCategoryTitles()
         
         addSubviews()
@@ -167,6 +160,7 @@ final class CategorySelectionViewController: UIViewController {
     
 }
 
+//MARK: - UITableViewDataSource
 
 extension CategorySelectionViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -195,7 +189,7 @@ extension CategorySelectionViewController: UITableViewDataSource {
     }
 }
 
-
+//MARK: - UITableViewDelegate
 extension CategorySelectionViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -203,19 +197,15 @@ extension CategorySelectionViewController: UITableViewDelegate {
            let lastCell = tableView.cellForRow(at: lastIndexPath) as? CategoryTableViewCell {
             lastCell.accessoryType = .none
         }
-
+        
         if let cell = tableView.cellForRow(at: indexPath) as? CategoryTableViewCell {
             cell.accessoryType = .checkmark
             cell.tintColor = .systemBlue
         }
-
+        
         lastSelectedIndexPath = indexPath
-        let selectedCategory = viewModel.categoryTitles[indexPath.row]
-        delegate?.categorySelected(selectedCategory)
-
-        self.navigationController?.popViewController(animated: true)
+        viewModel.selectCategory(at: indexPath.row)
     }
-
     
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         let separatorInset: CGFloat = 16
