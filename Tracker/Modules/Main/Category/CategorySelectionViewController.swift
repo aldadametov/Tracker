@@ -9,23 +9,22 @@ import UIKit
 
 final class CategorySelectionViewController: UIViewController {
     
-    let viewModel: CategorySelectionViewModel
-    
-    var savedCategory: String?
-    
-    init() {
-        let categoryStore = TrackerCategoryStore()
-        self.viewModel = CategorySelectionViewModel(categoryStore: categoryStore)
+    var viewModel: CategorySelectionViewModelProtocol
+
+    init(viewModel: CategorySelectionViewModelProtocol) {
+        self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
+    var savedCategory: String?
+    
     private var lastSelectedIndexPath: IndexPath?
     
-    private let titleLabel: UILabel = {
+    private lazy var titleLabel: UILabel = {
         let label = UILabel()
         label.text = "Категория"
         label.frame = CGRect(x: 0, y: 0, width: 149, height: 22)
@@ -36,7 +35,7 @@ final class CategorySelectionViewController: UIViewController {
         return label
     }()
     
-    private let noCategoriesCreatedImageView: UIImageView = {
+    private lazy var noCategoriesCreatedImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.image = UIImage(named: "noTrackersSet")
         imageView.contentMode = .scaleAspectFit
@@ -44,7 +43,7 @@ final class CategorySelectionViewController: UIViewController {
         return imageView
     }()
     
-    private let noCategoriesCreatedLabel: UILabel  = {
+    private lazy var noCategoriesCreatedLabel: UILabel  = {
         let label = UILabel()
         label.text = "Привычки и события можно обьеденить по смыслу"
         label.textColor = .ypBlack
@@ -56,7 +55,7 @@ final class CategorySelectionViewController: UIViewController {
         return label
     } ()
     
-    private let cateoryTableView: UITableView = {
+    private lazy var cateoryTableView: UITableView = {
         let tableView = UITableView(frame: .zero, style: .plain)
         tableView.translatesAutoresizingMaskIntoConstraints = false
         let cornerRadius: CGFloat = 16.0
@@ -67,7 +66,7 @@ final class CategorySelectionViewController: UIViewController {
         return tableView
     }()
     
-    private let addCategoryButton: UIButton = {
+    private lazy var addCategoryButton: UIButton = {
         let button = UIButton()
         button.setTitle("Добавить категорию", for: .normal)
         button.backgroundColor = .ypBlack

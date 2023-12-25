@@ -5,13 +5,23 @@
 //  Created by Алишер Дадаметов on 23.12.2023.
 //
 
-import UIKit
+import Foundation
+
+protocol CategorySelectionViewModelProtocol {
+    var delegate: CategorySelectionDelegate? { get set }
+    var categoryTitles: [String] { get }
+    var onCategoryTitlesUpdated: (() -> Void)? { get set }
+    var onCategorySelected: ((String) -> Void)? { get set }
+
+    func fetchCategoryTitles()
+    func selectCategory(at index: Int)
+}
 
 protocol CategorySelectionDelegate: AnyObject {
     func categorySelected(_ category: String)
 }
 
-final class CategorySelectionViewModel {
+final class CategorySelectionViewModel: CategorySelectionViewModelProtocol {
     
     private let categoryStore: TrackerCategoryStore
     

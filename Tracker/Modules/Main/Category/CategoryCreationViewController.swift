@@ -11,7 +11,7 @@ final class CategoryCreationViewController: UIViewController {
     
     private let trackerCategoryStore = TrackerCategoryStore()
     
-    private let titleLabel: UILabel = {
+    private lazy var titleLabel: UILabel = {
         let label = UILabel()
         label.text = "Новая категория"
         label.frame = CGRect(x: 0, y: 0, width: 149, height: 22)
@@ -22,7 +22,7 @@ final class CategoryCreationViewController: UIViewController {
         return label
     }()
     
-    private let nameTextField: UITextField = {
+    private lazy var nameTextField: UITextField = {
         let textField = UITextField()
         textField.placeholder = "Введите название категории"
         textField.backgroundColor = .ypBackgroundDay
@@ -37,7 +37,7 @@ final class CategoryCreationViewController: UIViewController {
         return textField
     }()
     
-    private let doneButton: UIButton = {
+    private lazy var doneButton: UIButton = {
         let button = UIButton()
         button.setTitle("Готово", for: .normal)
         button.backgroundColor = .ypGray
