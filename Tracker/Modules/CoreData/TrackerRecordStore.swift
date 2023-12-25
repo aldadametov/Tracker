@@ -23,18 +23,16 @@ final class TrackerRecordStore {
     
     func addNewTrackerRecord(_ trackerRecord: TrackerRecord, for tracker: Tracker) {
         guard let trackerCoreData = getTrackerCoreData(for: tracker) else {
-            print("Error: Tracker not found in Core Data.")
             return
         }
         
         let trackerRecordCoreData = TrackerRecordCoreData(context: context)
         trackerRecordCoreData.date = trackerRecord.date
         trackerRecordCoreData.id = trackerRecord.id
-        trackerRecordCoreData.tracker = trackerCoreData // Установите свойство tracker
+        trackerRecordCoreData.tracker = trackerCoreData
 
         do {
             try context.save()
-            print("Saving TrackerRecord for \(trackerRecord.id) on \(trackerRecord.date)")
         } catch {
             print("Error saving TrackerRecord: \(error)")
         }
@@ -48,14 +46,12 @@ final class TrackerRecordStore {
             let results = try context.fetch(fetchRequest)
             return results.first
         } catch {
-            print("Error fetching TrackerCoreData: \(error)")
             return nil
         }
     }
     
     func deleteTrackerRecord(for tracker: Tracker, on date: Date) {
         guard let trackerCoreData = getTrackerCoreData(for: tracker) else {
-            print("Error: Tracker not found in Core Data.")
             return
         }
 
@@ -91,7 +87,6 @@ final class TrackerRecordStore {
             let records = try context.fetch(fetchRequest)
             return !records.isEmpty
         } catch {
-            print("Error checking if tracker is completed: \(error)")
             return false
         }
     }
@@ -107,7 +102,6 @@ final class TrackerRecordStore {
             let countResult = try context.fetch(fetchRequest)
             return countResult.first?.intValue ?? 0
         } catch {
-            print("Error counting completed days: \(error)")
             return 0
         }
     }

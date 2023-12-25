@@ -43,4 +43,16 @@ final class TrackerCategoryStore: NSObject {
             print("Error saving context: \(error)")
         }
     }
+    
+    func fetchAllCategoriesTitles() -> [String] {
+        let fetchRequest: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
+
+        do {
+            let categories = try context.fetch(fetchRequest)
+            return categories.map { $0.title ?? "" }
+        } catch {
+            print("Error fetching categories: \(error)")
+            return []
+        }
+    }
 }

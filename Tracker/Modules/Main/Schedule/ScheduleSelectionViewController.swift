@@ -147,7 +147,6 @@ extension ScheduleSelectionViewController: UITableViewDelegate, UITableViewDataS
                 }
             }
         }
-        
         return cell
     }
 }

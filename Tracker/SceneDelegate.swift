@@ -9,8 +9,13 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     ) {
         guard let scene = (scene as? UIWindowScene) else { return }
         let window = UIWindow(windowScene: scene)
-        let tabBarController = TabBarController() // Используйте TabBarController вместо TrackersViewController
-        window.rootViewController = tabBarController
+        if UserDefaults.standard.bool(forKey: "isOnboardingShown") {
+                let tabBarController = TabBarController() 
+                window.rootViewController = tabBarController
+            } else {
+                let onboardingViewController = OnboardingViewController()
+                window.rootViewController = onboardingViewController
+            }
         self.window = window
         window.makeKeyAndVisible()
     }

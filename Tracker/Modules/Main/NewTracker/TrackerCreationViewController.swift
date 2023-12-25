@@ -1,13 +1,13 @@
 import UIKit
 
 protocol TrackerCreationDelegate: AnyObject {
-    func didCreateTracker(_ tracker: Tracker, isEvent: Bool)
+    func didCreateTracker(_ tracker: Tracker, category: TrackerCategory, isEvent: Bool)
 }
 
-final class TrackerCreationViewController: UIViewController, ScheduleSelectionDelegate {
+final class TrackerCreationViewController: UIViewController, ScheduleSelectionDelegate, CategorySelectionDelegate {
     
     weak var delegate: TrackerCreationDelegate?
-
+    
     var schedule: [Schedule] = []
     
     var isEvent: Bool = false
@@ -17,11 +17,13 @@ final class TrackerCreationViewController: UIViewController, ScheduleSelectionDe
     private var selectedColor: UIColor
     private var selectedEmojiIndexPath: IndexPath?
     private var selectedColorIndexPath: IndexPath?
+    private var selectedCategory: String
     
     init(isEvent: Bool = false) {
         self.isEvent = isEvent
         self.selectedEmoji = ""
         self.selectedColor = .clear
+        self.selectedCategory = ""
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -72,7 +74,7 @@ final class TrackerCreationViewController: UIViewController, ScheduleSelectionDe
         button.setImage(UIImage(systemName: "xmark.circle.fill")?.withRenderingMode(.alwaysTemplate), for: .normal)
         button.tintColor = .lightGray
         button.frame = CGRect(x: 0, y: 0, width: 20, height: 20)
-        button.contentEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 12) // добавленный отступ влево
+        button.contentEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 12)
         button.contentMode = .scaleAspectFit
         button.isHidden = true
         return button
@@ -139,6 +141,7 @@ final class TrackerCreationViewController: UIViewController, ScheduleSelectionDe
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
+        selectedCategory = UserDefaults.standard.string(forKey: "selectedCategory") ?? ""
         addSubviews()
         emojiAndColorCollectionView.register(EmojiCollectionViewCell.self, forCellWithReuseIdentifier: "EmojiCell")
         emojiAndColorCollectionView.register(ColorCollectionViewCell.self, forCellWithReuseIdentifier: "ColorCell")
@@ -217,22 +220,23 @@ final class TrackerCreationViewController: UIViewController, ScheduleSelectionDe
             
             cancelButton.topAnchor.constraint(equalTo: emojiAndColorCollectionView.bottomAnchor, constant: 16),
             cancelButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
-            cancelButton.widthAnchor.constraint(equalToConstant: 166),
             cancelButton.heightAnchor.constraint(equalToConstant: 60),
             
             createButton.topAnchor.constraint(equalTo: emojiAndColorCollectionView.bottomAnchor, constant: 16),
             createButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
-            createButton.widthAnchor.constraint(equalToConstant: 166),
             createButton.heightAnchor.constraint(equalToConstant: 60),
+            
+            cancelButton.widthAnchor.constraint(equalTo: createButton.widthAnchor),
+            createButton.leadingAnchor.constraint(equalTo: cancelButton.trailingAnchor, constant: 8)
             
         ])
     }
     
     @objc private func textFieldDidChange() {
         guard let text = nameTextField.text else { return }
-
+        
         clearButton.isHidden = text.isEmpty
-
+        
         if text.count > maxCharacterCount {
             symbolsLimitLabel.isHidden = false
             updateConstraintsForSymbolsLimitLabel(true)
@@ -246,19 +250,26 @@ final class TrackerCreationViewController: UIViewController, ScheduleSelectionDe
     private func updateConstraintsForSymbolsLimitLabel(_ isVisible: Bool) {
         if isVisible {
             contentView.addSubview(symbolsLimitLabel)
-
+            
             NSLayoutConstraint.activate([
                 symbolsLimitLabel.topAnchor.constraint(equalTo: nameTextField.bottomAnchor, constant: 8),
                 symbolsLimitLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
                 symbolsLimitLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
                 symbolsLimitLabel.bottomAnchor.constraint(equalTo: tableView.topAnchor, constant: -32)
             ])
-
+            
             tableView.topAnchor.constraint(equalTo: nameTextField.bottomAnchor, constant: 62).isActive = true
         } else {
             symbolsLimitLabel.removeFromSuperview()
             tableView.topAnchor.constraint(equalTo: nameTextField.bottomAnchor, constant: 24).isActive = true
         }
+    }
+    
+    func categorySelected(_ category: String) {
+        self.selectedCategory = category
+        tableView.reloadData()
+        UserDefaults.standard.set(category, forKey: "selectedCategory")
+        updateCreateButtonState()
     }
     
     func didSelectSchedule(_ selectedSchedule: [Schedule]) {
@@ -271,13 +282,14 @@ final class TrackerCreationViewController: UIViewController, ScheduleSelectionDe
         let isNameTextFieldEmpty = nameTextField.text?.isEmpty ?? true
         let isScheduleSelected = !schedule.isEmpty || isEvent
         let isEmojiSelected = !selectedEmoji.isEmpty
+        let isCategorySelected = !selectedCategory.isEmpty
         let isColorSelected = selectedColor != .clear
-
-        let isButtonEnabled = !isNameTextFieldEmpty && isScheduleSelected && isEmojiSelected && isColorSelected
+        
+        let isButtonEnabled = !isNameTextFieldEmpty && isScheduleSelected && isEmojiSelected && isColorSelected && isCategorySelected
         createButton.isEnabled = isButtonEnabled
         createButton.backgroundColor = isButtonEnabled ? .ypBlack : .ypGray
     }
-
+    
     
     @objc private func clearButtonTapped() {
         nameTextField.text = ""
@@ -295,8 +307,8 @@ final class TrackerCreationViewController: UIViewController, ScheduleSelectionDe
                                  color: selectedColor,
                                  emoji: selectedEmoji,
                                  schedule: isEvent ? [.monday, .tuesday, .thursday, .wednesday, .friday, .saturday, .sunday] : schedule)
-        
-        delegate?.didCreateTracker(newTracker, isEvent: isEvent)
+        let category = TrackerCategory(title: selectedCategory, trackers: [newTracker])
+        delegate?.didCreateTracker(newTracker,category: category, isEvent: isEvent)
         dismiss(animated: true)
     }
 }
@@ -314,9 +326,10 @@ extension TrackerCreationViewController: UITableViewDelegate, UITableViewDataSou
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "CustomCell", for: indexPath) as! CustomTableViewCell
+        cell.selectionStyle = .none
         
         if indexPath.row == 0 && !isEvent {
-            cell.configure(title: "Категория", description: "Важное")
+            cell.configure(title: "Категория", description: selectedCategory)
             cell.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16 )
         } else if indexPath.row == 1 && !isEvent {
             cell.configure(title: "Расписание", description: scheduleDescription())
@@ -330,13 +343,13 @@ extension TrackerCreationViewController: UITableViewDelegate, UITableViewDataSou
     
     private func scheduleDescription() -> String {
         let allDaysOfWeek = Schedule.allCases
-
+        
         if Set(schedule) == Set(allDaysOfWeek) {
             return "Каждый День"
         } else if !schedule.isEmpty {
             return schedule.map { $0.shortRepresentation() }.joined(separator: ", ")
         }
-
+        
         return ""
     }
     
@@ -348,6 +361,14 @@ extension TrackerCreationViewController: UITableViewDelegate, UITableViewDataSou
             scheduleSelectionVC.selectedSchedule = self.schedule
             scheduleSelectionVC.delegate = self
             self.navigationController?.pushViewController(scheduleSelectionVC, animated: true)
+        } else {
+            let categorySelectionViewModel = CategorySelectionViewModel(categoryStore: TrackerCategoryStore())
+            let categorySelectionVC = CategorySelectionViewController(viewModel: categorySelectionViewModel)
+            let savedCategory = UserDefaults.standard.string(forKey: "selectedCategory") ?? ""
+            categorySelectionVC.savedCategory = savedCategory
+            categorySelectionVC.viewModel.delegate = self
+            self.navigationController?.pushViewController(categorySelectionVC, animated: true)
+
         }
     }
     
@@ -390,21 +411,21 @@ extension TrackerCreationViewController: UICollectionViewDataSource{
     }
     
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
-            guard let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "SectionHeader", for: indexPath) as? SectionHeaderCollectionReusableView else {
-                fatalError("Could not dequeue SectionHeader")
-            }
-
-            switch indexPath.section {
-            case 0:
-                header.title = "Эмодзи"
-            case 1:
-                header.title = "Цвета"
-            default:
-                header.title = ""
-            }
-
-            return header
+        guard let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "SectionHeader", for: indexPath) as? SectionHeaderCollectionReusableView else {
+            fatalError("Could not dequeue SectionHeader")
         }
+        
+        switch indexPath.section {
+        case 0:
+            header.title = "Эмодзи"
+        case 1:
+            header.title = "Цвета"
+        default:
+            header.title = ""
+        }
+        
+        return header
+    }
 }
 
 // MARK: - UICollectionViewDelegate
@@ -415,7 +436,7 @@ extension TrackerCreationViewController: UICollectionViewDelegate {
         switch indexPath.section {
         case 0:
             if let previousSelectedIndexPath = selectedEmojiIndexPath,
-                let previousCell = collectionView.cellForItem(at: previousSelectedIndexPath) as? EmojiCollectionViewCell {
+               let previousCell = collectionView.cellForItem(at: previousSelectedIndexPath) as? EmojiCollectionViewCell {
                 previousCell.contentView.backgroundColor = .clear
             }
             
@@ -427,7 +448,7 @@ extension TrackerCreationViewController: UICollectionViewDelegate {
             }
         case 1:
             if let previousSelectedIndexPath = selectedColorIndexPath,
-                let previousCell = collectionView.cellForItem(at: previousSelectedIndexPath) as? ColorCollectionViewCell {
+               let previousCell = collectionView.cellForItem(at: previousSelectedIndexPath) as? ColorCollectionViewCell {
                 previousCell.layer.borderWidth = 0
             }
             
@@ -444,7 +465,7 @@ extension TrackerCreationViewController: UICollectionViewDelegate {
         }
         updateCreateButtonState()
     }
-
+    
     func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
         switch indexPath.section {
         case 0:
