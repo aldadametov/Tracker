@@ -12,16 +12,18 @@ final class TabBarController: UITabBarController {
         super.viewDidLoad()
         let trackersViewController = TrackersViewController()
         let trackersNavigationController = UINavigationController(rootViewController: trackersViewController)
+        let trackersLabel = NSLocalizedString("trackers", comment: "Label title for tabBarController")
         trackersNavigationController.tabBarItem = UITabBarItem(
-            title: "Трекеры",
+            title: trackersLabel,
             image: UIImage(named: "trackersButton"),
             selectedImage: nil
         )
 
         let statisticsViewController = StatisticsViewContoller()
         let statisticsNavigationController = UINavigationController(rootViewController: statisticsViewController)
+        let statisticsLabel = NSLocalizedString("statistics", comment: "Label title for tabBarController")
         statisticsNavigationController.tabBarItem = UITabBarItem(
-            title: "Статистика",
+            title: statisticsLabel,
             image: UIImage(named: "statsButton"),
             selectedImage: nil
         )
@@ -41,3 +43,4 @@ final class TabBarController: UITabBarController {
         
     }
 }
+

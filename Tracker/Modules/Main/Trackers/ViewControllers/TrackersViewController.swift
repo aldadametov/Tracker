@@ -23,8 +23,8 @@ final class TrackersViewController: UIViewController {
         datePicker.translatesAutoresizingMaskIntoConstraints = false
         datePicker.preferredDatePickerStyle = .compact
         datePicker.datePickerMode = .date
-        datePicker.locale = Locale(identifier: "ru_RU")
-        datePicker.calendar = Calendar(identifier: .gregorian)
+        datePicker.locale = Locale.current
+        datePicker.calendar = Calendar.current
         datePicker.calendar.firstWeekday = 2
         datePicker.addTarget(self, action: #selector(datePickerValueChanged), for: .valueChanged)
         return datePicker
@@ -32,7 +32,7 @@ final class TrackersViewController: UIViewController {
     
     private let trackersLabel: UILabel = {
         let label = UILabel()
-        label.text = "Трекеры"
+        label.text = NSLocalizedString("trackers", comment: "text for trackersLabel")
         label.textColor = .ypBlack
         label.font = UIFont(name: "SFPro-Bold", size: 34)
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -51,7 +51,7 @@ final class TrackersViewController: UIViewController {
     private let noTrackersCreatedLabel: UILabel  = {
         let label = UILabel()
         label.frame = CGRect(x: 0, y: 0, width: 343, height: 18)
-        label.text = "Что будем отслеживать?"
+        label.text = NSLocalizedString("what_to_track", comment: "text for noTrackersCreatedLabel")
         label.textColor = .ypBlack
         label.font = UIFont(name: "SFPro-Medium", size: 12)
         label.textAlignment = .center
@@ -72,7 +72,7 @@ final class TrackersViewController: UIViewController {
     private let noTrackersFoundLabel: UILabel  = {
         let label = UILabel()
         label.frame = CGRect(x: 0, y: 0, width: 343, height: 18)
-        label.text = "Ничего не найдено"
+        label.text = NSLocalizedString("nothing_found", comment: "text for nothing_found")
         label.textColor = .ypBlack
         label.font = UIFont(name: "SFPro-Medium", size: 12)
         label.textAlignment = .center
@@ -112,7 +112,7 @@ final class TrackersViewController: UIViewController {
     }
     @objc func addTrackerButtonTapped() {
         let trackerTypeSelectionVC = TrackerTypeSelectionViewController()
-        trackerTypeSelectionVC.delegate = self 
+        trackerTypeSelectionVC.delegate = self
         let navController = UINavigationController(rootViewController: trackerTypeSelectionVC)
         present(navController, animated: true, completion: nil)
     }
@@ -187,7 +187,7 @@ final class TrackersViewController: UIViewController {
         
         trackersCollectionView.register(SectionHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "SectionHeader")
         
-        searchBar.placeholder = "Поиск"
+        searchBar.placeholder = NSLocalizedString("search", comment: "placeholder text for searchBar")
         searchBar.delegate = self
         searchBar.translatesAutoresizingMaskIntoConstraints = false
         searchBar.backgroundImage = UIImage()
@@ -239,7 +239,7 @@ extension TrackersViewController: UICollectionViewDataSource {
         }
         
         let daysCount = trackerRecordStore.countCompletedDays(for: currentTracker)
-        cell.daysCountLabel.text = formatDaysString(daysCount)
+        cell.daysCountLabel.text = String.localizedStringWithFormat(NSLocalizedString("daysCount", comment: ""), daysCount)
         
         return cell
     }
@@ -336,20 +336,6 @@ extension TrackersViewController: TrackerCellDelegate {
         }
         trackersCollectionView.reloadItems(at: [indexPath])
     }
-    
-    
-    func formatDaysString(_ days: Int) -> String {
-        let remainder10 = days % 10
-        let remainder100 = days % 100
-        
-        if remainder10 == 1, remainder100 != 11 {
-            return "\(days) день"
-        } else if remainder10 >= 2, remainder10 <= 4, (remainder100 < 10 || remainder100 >= 20) {
-            return "\(days) дня"
-        } else {
-            return "\(days) дней"
-        }
-    }
 }
 
 //MARK: - TrackerViewControllerDelegate
@@ -371,6 +357,7 @@ extension TrackersViewController: TrackerStoreDelegate {
         showPlaceholder()
     }
 }
+
 
 
 
