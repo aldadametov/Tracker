@@ -10,7 +10,17 @@ import UIKit
 final class TabBarController: UITabBarController {
     override func viewDidLoad() {
         super.viewDidLoad()
-        let trackersViewController = TrackersViewController()
+
+        let trackerStore = TrackerStore()
+        let trackerCategoryStore = TrackerCategoryStore()
+        let trackerRecordStore = TrackerRecordStore()
+
+        let trackersViewController = TrackersViewController(
+            trackerStore: trackerStore,
+            trackerCategoryStore: trackerCategoryStore,
+            trackerRecordStore: trackerRecordStore
+        )
+
         let trackersNavigationController = UINavigationController(rootViewController: trackersViewController)
         let trackersLabel = NSLocalizedString("trackers", comment: "Label title for tabBarController")
         trackersNavigationController.tabBarItem = UITabBarItem(

@@ -10,11 +10,27 @@ import UIKit
 
 final class TrackersViewController: UIViewController {
     
-    private let trackerStore = TrackerStore()
-    private let trackerCategoryStore = TrackerCategoryStore()
-    private let trackerRecordStore = TrackerRecordStore()
+    private let trackerStore: TrackerStore
+    private let trackerCategoryStore: TrackerCategoryStore
+    private let trackerRecordStore: TrackerRecordStore
+    private let searchBar: UISearchBar
+
+    init(trackerStore: TrackerStore,
+         trackerCategoryStore: TrackerCategoryStore,
+         trackerRecordStore: TrackerRecordStore,
+         searchBar: UISearchBar = UISearchBar()) {
+        self.trackerStore = trackerStore
+        self.trackerCategoryStore = trackerCategoryStore
+        self.trackerRecordStore = trackerRecordStore
+        self.searchBar = searchBar
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
     private var currentDate: Date = Date()
-    private let searchBar = UISearchBar()
     private var searchResults: [TrackerCategory] = []
     private var isSearchActive: Bool = false
     
@@ -175,6 +191,7 @@ final class TrackersViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .ypWhite
+
         
         if let navBar = navigationController?.navigationBar {
             navBar.tintColor = UIColor.black

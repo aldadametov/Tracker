@@ -36,7 +36,7 @@ protocol TrackerStoreDelegate: AnyObject {
     )
 }
 
-final class TrackerStore: NSObject {
+class TrackerStore: NSObject {
     private let context: NSManagedObjectContext
     private var fetchedResultsController: NSFetchedResultsController<TrackerCoreData>!
     weak var delegate: TrackerStoreDelegate?
@@ -142,11 +142,6 @@ final class TrackerStore: NSObject {
             return nil
         }
     }
-}
-
-//MARK: UIcollectionviewDataSource
-
-extension TrackerStore {
     
     func filteredTrackers(for currentDate: Date) -> [TrackerCategory] {
         guard let sections = fetchedResultsController.sections else { return [] }
@@ -225,6 +220,7 @@ extension TrackerStore {
         return allCategories
     }
 }
+
 
 extension TrackerStore: NSFetchedResultsControllerDelegate {
     func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
