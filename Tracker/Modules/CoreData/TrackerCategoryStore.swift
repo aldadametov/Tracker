@@ -33,7 +33,7 @@ final class TrackerCategoryStore: NSObject {
             trackerCoreData.color = tracker.color
             trackerCoreData.emoji = tracker.emoji
             trackerCoreData.schedule = tracker.schedule as NSObject
-            
+            trackerCoreData.isPinned = tracker.isPinned
             categoryCoreData.addToTrackers(trackerCoreData)
         }
         

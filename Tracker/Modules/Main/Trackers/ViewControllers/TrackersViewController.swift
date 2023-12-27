@@ -239,7 +239,7 @@ extension TrackersViewController: UICollectionViewDataSource {
         
         let categories = isSearchActive ? searchResults : trackerStore.filteredTrackers(for: currentDate)
         let currentTracker = categories[indexPath.section].trackers[indexPath.row]
-        
+        cell.configureWith(tracker: currentTracker)
         cell.trackerCardView.backgroundColor = currentTracker.color
         cell.emojiLabel.text = currentTracker.emoji
         cell.trackerLabel.text = currentTracker.name
@@ -272,6 +272,38 @@ extension TrackersViewController: UICollectionViewDataSource {
         return UICollectionReusableView()
     }
 }
+//MARK: - UICollectionViewDelegate
+
+extension TrackersViewController: UICollectionViewDelegate {
+
+    func collectionView(_ collectionView: UICollectionView, contextMenuConfigurationForItemAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
+        let categories = isSearchActive ? searchResults : trackerStore.filteredTrackers(for: currentDate)
+        let tracker = categories[indexPath.section].trackers[indexPath.row]
+
+        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { _ -> UIMenu? in
+            let pinActionTitle = tracker.isPinned ? "Открепить" : "Закрепить"
+            let pinAction = UIAction(title: pinActionTitle) { action in
+                if tracker.isPinned {
+                    self.trackerStore.unpinTracker(withId: tracker.id)
+                } else {
+                    self.trackerStore.pinTracker(withId: tracker.id)
+                }
+            }
+
+            let editAction = UIAction(title: "Редактировать") { action in
+                // Запуск редактирования привычки
+            }
+
+            let deleteAction = UIAction(title: "Удалить", attributes: .destructive) { action in
+                // Запуск удаления привычки
+            }
+
+            return UIMenu(title: "", children: [pinAction, editAction, deleteAction])
+        }
+    }
+}
+
+
 
 //MARK: - UICollectionViewDelegateFlowLayout
 

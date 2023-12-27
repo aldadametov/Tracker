@@ -70,8 +70,8 @@ class TrackerStore: NSObject {
         
         let fetchRequest = TrackerCoreData.fetchRequest()
         fetchRequest.sortDescriptors = [
+            NSSortDescriptor(key: "isPinned", ascending: false),
             NSSortDescriptor(key: "category.title", ascending: true),
-            NSSortDescriptor(key: "name", ascending: true)
         ]
         
         let controller = NSFetchedResultsController(fetchRequest: fetchRequest,
@@ -99,12 +99,16 @@ class TrackerStore: NSObject {
         guard let schedule = trackerCoreData.schedule else {
             throw TrackerStoreError.decodingErrorInvalidSchedule
         }
+        let isPinned = trackerCoreData.isPinned
         return Tracker(
             id: id,
             name: name,
             color: color as? UIColor,
             emoji: emoji,
-            schedule: schedule as! [Schedule])
+            schedule: schedule as! [Schedule],
+            isPinned: isPinned
+        )
+            
     }
 
     func addNewTracker(_ tracker: Tracker, to category: TrackerCategory?) {
@@ -126,7 +130,13 @@ class TrackerStore: NSObject {
         trackerCoreData.color = tracker.color
         trackerCoreData.emoji = tracker.emoji
         trackerCoreData.schedule = tracker.schedule as NSObject
-        trackerCoreData.category = category
+        trackerCoreData.isPinned = tracker.isPinned
+        
+        if !tracker.isPinned && trackerCoreData.originalCategory != nil {
+            let originalCategory = getTrackerCategoryCoreData(by: trackerCoreData.originalCategory! as! String)
+            trackerCoreData.category = originalCategory
+            trackerCoreData.originalCategory = nil
+        }
     }
     
     
@@ -140,6 +150,89 @@ class TrackerStore: NSObject {
         } catch {
             print("Error fetching TrackerCategoryCoreData: \(error)")
             return nil
+        }
+    }
+
+    func moveToPinnedCategory(withId id: UUID) {
+        let fetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "id == %@", id as CVarArg)
+
+        do {
+            let results = try context.fetch(fetchRequest)
+            if let trackerToMove = results.first {
+                // Сохраняем исходную категорию, если она еще не сохранена
+                if trackerToMove.originalCategory == nil {
+                    trackerToMove.originalCategory = trackerToMove.category?.title
+                }
+
+                // Находим или создаем категорию "Закрепленные"
+                let pinnedCategoryTitle = "Закрепленные"
+                var pinnedCategory = getTrackerCategoryCoreData(by: pinnedCategoryTitle)
+                if pinnedCategory == nil {
+                    pinnedCategory = TrackerCategoryCoreData(context: context)
+                    pinnedCategory!.title = pinnedCategoryTitle
+                }
+
+                // Перемещаем трекер в категорию "Закрепленные"
+                trackerToMove.category = pinnedCategory
+                try context.save()
+            }
+        } catch {
+            print("Error moving tracker to pinned category: \(error)")
+        }
+    }
+    
+    func moveToOriginalCategory(withId id: UUID) {
+        let fetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "id == %@", id as CVarArg)
+
+        do {
+            let results = try context.fetch(fetchRequest)
+            if let trackerToMove = results.first,
+               let originalCategoryTitle = trackerToMove.originalCategory {
+                // Восстановить категорию трекера из originalCategory
+                let originalCategory = getTrackerCategoryCoreData(by: originalCategoryTitle) ?? TrackerCategoryCoreData(context: context)
+                trackerToMove.category = originalCategory
+
+                // Сбросить originalCategory, так как трекер возвращается в исходную категорию
+                trackerToMove.originalCategory = nil
+                try context.save()
+            }
+        } catch {
+            print("Error moving tracker to original category: \(error)")
+        }
+    }
+
+    
+    func pinTracker(withId id: UUID) {
+        let fetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "id == %@", id as CVarArg)
+
+        do {
+            let results = try context.fetch(fetchRequest)
+            if let trackerToPin = results.first {
+                trackerToPin.isPinned = true
+                moveToPinnedCategory(withId: id)
+                try context.save()
+            }
+        } catch {
+            print("Error pinning tracker: \(error)")
+        }
+    }
+
+    func unpinTracker(withId id: UUID) {
+        let fetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "id == %@", id as CVarArg)
+
+        do {
+            let results = try context.fetch(fetchRequest)
+            if let trackerToUnpin = results.first {
+                trackerToUnpin.isPinned = false
+                moveToOriginalCategory(withId: id)
+                try context.save()
+            }
+        } catch {
+            print("Error unpinning tracker: \(error)")
         }
     }
     
@@ -169,6 +262,7 @@ class TrackerStore: NSObject {
 
         return filteredCategories
     }
+
 
     
     func sectionHeaderTitle(_ section: Int) -> String? {
