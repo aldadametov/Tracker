@@ -290,8 +290,13 @@ extension TrackersViewController: UICollectionViewDelegate {
                 }
             }
 
-            let editAction = UIAction(title: "Редактировать") { action in
-                // Запуск редактирования привычки
+            let editAction = UIAction(title: "Редактировать") { [weak self] action in
+                guard let self = self else { return }
+                let categoryTitle = self.trackerStore.getCategoryForTracker(withId: tracker.id) ?? ""
+                let trackerEditVC = TrackerCreationViewController(trackerToEdit: tracker, category: categoryTitle) // дописать логику isEvent
+                trackerEditVC.delegate = self
+                let navController = UINavigationController(rootViewController: trackerEditVC)
+                self.present(navController, animated: true, completion: nil)
             }
 
             let deleteAction = UIAction(title: "Удалить", attributes: .destructive) { action in
@@ -390,6 +395,10 @@ extension TrackersViewController: TrackerCellDelegate {
 //MARK: - TrackerViewControllerDelegate
 
 extension TrackersViewController: TrackerCreationDelegate {
+    func didUpdateTracker(_ tracker: Tracker, category: String) {
+        trackerStore.updateTracker(tracker, inCategory: category)
+        dismiss(animated: true)
+    }
     
     func didCreateTracker(_ tracker: Tracker, category: TrackerCategory, isEvent: Bool) {
         let categoryTitle = category.title

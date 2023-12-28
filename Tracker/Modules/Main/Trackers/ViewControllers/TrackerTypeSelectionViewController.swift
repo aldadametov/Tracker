@@ -70,7 +70,7 @@ final class TrackerTypeSelectionViewController: UIViewController {
 
     @objc func habitButtonTapped() {
         selectedCategory = "Привычка"
-        let createHabitVC = TrackerCreationViewController(isEvent: false)
+        let createHabitVC = TrackerCreationViewController(trackerToEdit: nil, isEvent: false)
         createHabitVC.delegate = delegate
         let navController = UINavigationController(rootViewController: createHabitVC)
         present(navController, animated: true, completion: nil)
@@ -78,7 +78,7 @@ final class TrackerTypeSelectionViewController: UIViewController {
 
     @objc func eventButtonTapped() {
         selectedCategory = "Нерегулярное событие"
-        let createEventVC = TrackerCreationViewController(isEvent: true)
+        let createEventVC = TrackerCreationViewController(trackerToEdit: nil, isEvent: true)
         createEventVC.delegate = delegate
         let navController = UINavigationController(rootViewController: createEventVC)
         present(navController, animated: true, completion: nil)

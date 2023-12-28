@@ -133,11 +133,39 @@ class TrackerStore: NSObject {
         trackerCoreData.isPinned = tracker.isPinned
         
         if !tracker.isPinned && trackerCoreData.originalCategory != nil {
-            let originalCategory = getTrackerCategoryCoreData(by: trackerCoreData.originalCategory! as! String)
+            let originalCategory = getTrackerCategoryCoreData(by: trackerCoreData.originalCategory! )
             trackerCoreData.category = originalCategory
             trackerCoreData.originalCategory = nil
         }
     }
+    
+    func updateTracker(_ updatedTracker: Tracker, inCategory categoryName: String) {
+        let fetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "id == %@", updatedTracker.id as CVarArg)
+
+        do {
+            let results = try context.fetch(fetchRequest)
+            if let trackerToUpdate = results.first {
+                trackerToUpdate.name = updatedTracker.name
+                trackerToUpdate.color = updatedTracker.color
+                trackerToUpdate.emoji = updatedTracker.emoji
+                trackerToUpdate.schedule = updatedTracker.schedule as NSObject
+                trackerToUpdate.isPinned = updatedTracker.isPinned
+
+                let category = getTrackerCategoryCoreData(by: categoryName) ?? {
+                    let newCategory = TrackerCategoryCoreData(context: context)
+                    newCategory.title = categoryName
+                    return newCategory
+                }()
+                trackerToUpdate.category = category
+
+                try context.save()
+            }
+        } catch {
+            print("Error updating tracker: \(error)")
+        }
+    }
+
     
     
     func getTrackerCategoryCoreData(by title: String) -> TrackerCategoryCoreData? {
@@ -152,6 +180,18 @@ class TrackerStore: NSObject {
             return nil
         }
     }
+    
+    func getCategoryForTracker(withId id: UUID) -> String? {
+        guard let sections = fetchedResultsController.sections else { return nil }
+
+        for section in sections {
+            if let trackersInCategory = section.objects as? [TrackerCoreData],
+               trackersInCategory.contains(where: { $0.id == id }) {
+                return section.name
+            }
+        }
+        return nil
+    }
 
     func moveToPinnedCategory(withId id: UUID) {
         let fetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
@@ -160,12 +200,10 @@ class TrackerStore: NSObject {
         do {
             let results = try context.fetch(fetchRequest)
             if let trackerToMove = results.first {
-                // Сохраняем исходную категорию, если она еще не сохранена
                 if trackerToMove.originalCategory == nil {
                     trackerToMove.originalCategory = trackerToMove.category?.title
                 }
 
-                // Находим или создаем категорию "Закрепленные"
                 let pinnedCategoryTitle = "Закрепленные"
                 var pinnedCategory = getTrackerCategoryCoreData(by: pinnedCategoryTitle)
                 if pinnedCategory == nil {
@@ -173,7 +211,6 @@ class TrackerStore: NSObject {
                     pinnedCategory!.title = pinnedCategoryTitle
                 }
 
-                // Перемещаем трекер в категорию "Закрепленные"
                 trackerToMove.category = pinnedCategory
                 try context.save()
             }
@@ -190,11 +227,9 @@ class TrackerStore: NSObject {
             let results = try context.fetch(fetchRequest)
             if let trackerToMove = results.first,
                let originalCategoryTitle = trackerToMove.originalCategory {
-                // Восстановить категорию трекера из originalCategory
                 let originalCategory = getTrackerCategoryCoreData(by: originalCategoryTitle) ?? TrackerCategoryCoreData(context: context)
                 trackerToMove.category = originalCategory
 
-                // Сбросить originalCategory, так как трекер возвращается в исходную категорию
                 trackerToMove.originalCategory = nil
                 try context.save()
             }

@@ -29,7 +29,7 @@ class MockTrackerStore: TrackerStore {
 final class TrackerTests: XCTestCase {
     func testTrackersViewControllerWithEmptyState() {
         let mockStore = MockTrackerStore()
-        mockStore.testTrackers = [] // Пустой массив для симуляции пустого состояния
+        mockStore.testTrackers = []
         
         let viewController = TrackersViewController(
             trackerStore: mockStore,
@@ -42,7 +42,6 @@ final class TrackerTests: XCTestCase {
     
     func testTrackersViewControllerWithData() {
         let mockStore = MockTrackerStore()
-        // Предоставьте тестовые данные трекеров здесь
         mockStore.testTrackers = [TrackerCategory(
             title: "Уборка",
             trackers: [
