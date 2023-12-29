@@ -166,7 +166,20 @@ class TrackerStore: NSObject {
         }
     }
 
-    
+    func deleteTracker(withId id: UUID) {
+        let fetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "id == %@", id as CVarArg)
+
+        do {
+            let results = try context.fetch(fetchRequest)
+            if let trackerToDelete = results.first {
+                context.delete(trackerToDelete)
+                try context.save()
+            }
+        } catch {
+            print("Error deleting tracker: \(error)")
+        }
+    }
     
     func getTrackerCategoryCoreData(by title: String) -> TrackerCategoryCoreData? {
         let fetchRequest = NSFetchRequest<TrackerCategoryCoreData>(entityName: "TrackerCategoryCoreData")

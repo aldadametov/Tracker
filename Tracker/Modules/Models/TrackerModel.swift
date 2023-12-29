@@ -14,7 +14,7 @@ struct Tracker: Hashable {
     let emoji: String
     let schedule: [Schedule]
     var isPinned: Bool = false
-    var originalCategory: String? // Добавлено новое свойство
+    var originalCategory: String?
 
     init(id: UUID = UUID(), name: String, color: UIColor?, emoji: String, schedule: [Schedule], isPinned: Bool = false, originalCategory: String? = nil) {
         self.id = id

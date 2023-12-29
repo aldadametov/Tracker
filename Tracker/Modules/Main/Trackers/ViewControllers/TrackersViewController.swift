@@ -293,14 +293,32 @@ extension TrackersViewController: UICollectionViewDelegate {
             let editAction = UIAction(title: "Редактировать") { [weak self] action in
                 guard let self = self else { return }
                 let categoryTitle = self.trackerStore.getCategoryForTracker(withId: tracker.id) ?? ""
-                let trackerEditVC = TrackerCreationViewController(trackerToEdit: tracker, category: categoryTitle) // дописать логику isEvent
+                
+                let allDaysOfWeek: Set<Schedule> = [.monday, .tuesday, .wednesday, .thursday, .friday, .saturday, .sunday]
+                let isEvent = Set(tracker.schedule) == allDaysOfWeek
+
+                let trackerEditVC = TrackerCreationViewController(trackerToEdit: tracker, category: categoryTitle, isEvent: isEvent)
                 trackerEditVC.delegate = self
                 let navController = UINavigationController(rootViewController: trackerEditVC)
                 self.present(navController, animated: true, completion: nil)
             }
 
-            let deleteAction = UIAction(title: "Удалить", attributes: .destructive) { action in
-                // Запуск удаления привычки
+
+            let deleteAction = UIAction(title: "Удалить", attributes: .destructive) { [weak self] action in
+                guard let self = self else { return }
+
+                let alertController = UIAlertController(title: "", message: "Уверены что хотите удалить трекер?", preferredStyle: .actionSheet)
+
+                let delete = UIAlertAction(title: "Удалить", style: .destructive) { _ in
+                    self.trackerStore.deleteTracker(withId: tracker.id)
+                }
+
+                let cancel = UIAlertAction(title: "Отменить", style: .cancel)
+
+                alertController.addAction(delete)
+                alertController.addAction(cancel)
+
+                self.present(alertController, animated: true)
             }
 
             return UIMenu(title: "", children: [pinAction, editAction, deleteAction])

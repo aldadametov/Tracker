@@ -8,7 +8,7 @@ protocol TrackerCreationDelegate: AnyObject {
 final class TrackerCreationViewController: UIViewController, ScheduleSelectionDelegate, CategorySelectionDelegate {
     
     private let trackerRecordStore = TrackerRecordStore()
-
+    
     weak var delegate: TrackerCreationDelegate?
     
     var schedule: [Schedule] = []
@@ -37,6 +37,7 @@ final class TrackerCreationViewController: UIViewController, ScheduleSelectionDe
             self.selectedCategory = category ?? ""
         }
         createButton.setTitle(trackerToEdit != nil ? "Сохранить" : "Создать", for: .normal)
+        
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -136,7 +137,7 @@ final class TrackerCreationViewController: UIViewController, ScheduleSelectionDe
     
     private var tableViewHeightConstraint: NSLayoutConstraint?
     private var contentViewHeightConstraint: NSLayoutConstraint?
-
+    
     private lazy var emojiAndColorCollectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
@@ -182,13 +183,13 @@ final class TrackerCreationViewController: UIViewController, ScheduleSelectionDe
         setupConstraints()
         configureInitialValues()
         setupActions()
-        
+        hideKeyboardWhenTappedAround()
         DispatchQueue.main.async {
             self.selectInitialCollectionViewItems()
         }
     }
     
-
+    
     private func setupCollectionView() {
         emojiAndColorCollectionView.register(EmojiCollectionViewCell.self, forCellWithReuseIdentifier: "EmojiCell")
         emojiAndColorCollectionView.register(ColorCollectionViewCell.self, forCellWithReuseIdentifier: "ColorCell")
@@ -197,23 +198,23 @@ final class TrackerCreationViewController: UIViewController, ScheduleSelectionDe
         emojiAndColorCollectionView.dataSource = self
         emojiAndColorCollectionView.reloadData()
     }
-
+    
     private func setupTableView() {
         tableView.register(CustomTableViewCell.self, forCellReuseIdentifier: "CustomCell")
         tableView.delegate = self
         tableView.dataSource = self
     }
-
+    
     private func configureInitialValues() {
         titleLabel.text = trackerToEdit != nil ? "Редактирование трекера" : (isEvent ? "Новое нерегулярное событие" : "Новая Привычка")
         tableViewHeightConstraint?.constant = isEvent ? 75 : 150
         tableView.layoutIfNeeded()
         if trackerToEdit != nil {
-               contentViewHeightConstraint?.constant = isEvent ? 825 : 925
-           } else {
-               contentViewHeightConstraint?.constant = isEvent ? 800 : 875
-           }
-           contentView.layoutIfNeeded()
+            contentViewHeightConstraint?.constant = isEvent ? 850 : 925
+        } else {
+            contentViewHeightConstraint?.constant = isEvent ? 800 : 875
+        }
+        contentView.layoutIfNeeded()
         
         updateConstraintsForDaysCountLabel()
         if let tracker = trackerToEdit {
@@ -229,7 +230,7 @@ final class TrackerCreationViewController: UIViewController, ScheduleSelectionDe
         nameTextField.rightViewMode = .whileEditing
         updateCreateButtonState()
     }
-
+    
     private func selectInitialCollectionViewItems() {
         if let emojiIndexPath = selectedEmojiIndexPath, emojis.indices.contains(emojiIndexPath.item) {
             emojiAndColorCollectionView.selectItem(at: emojiIndexPath, animated: false, scrollPosition: [])
@@ -367,7 +368,6 @@ final class TrackerCreationViewController: UIViewController, ScheduleSelectionDe
             nameTextField.topAnchor.constraint(equalTo: scrollView.topAnchor, constant: 40).isActive = true
         }
     }
-
     
     func categorySelected(_ category: String) {
         self.selectedCategory = category
@@ -413,7 +413,7 @@ final class TrackerCreationViewController: UIViewController, ScheduleSelectionDe
                 color: selectedColor,
                 emoji: selectedEmoji,
                 schedule: schedule,
-                isPinned: trackerToEdit.isPinned 
+                isPinned: trackerToEdit.isPinned
             )
             delegate?.didUpdateTracker(updatedTracker, category: selectedCategory)
         } else {
@@ -429,7 +429,7 @@ final class TrackerCreationViewController: UIViewController, ScheduleSelectionDe
         }
         dismiss(animated: true)
     }
-
+    
 }
 
 // MARK: - UITableViewDelegate, UITableViewDataSource
@@ -475,26 +475,21 @@ extension TrackerCreationViewController: UITableViewDelegate, UITableViewDataSou
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         
-        if indexPath.row == 0 && !isEvent {
+        if indexPath.row == 0 {
             let categorySelectionViewModel = CategorySelectionViewModel(categoryStore: TrackerCategoryStore())
             let categorySelectionVC = CategorySelectionViewController(viewModel: categorySelectionViewModel)
-            if let _ = trackerToEdit {
-                categorySelectionVC.savedCategory = selectedCategory
-            } else {
-                let savedCategory = UserDefaults.standard.string(forKey: "selectedCategory") ?? ""
-                categorySelectionVC.savedCategory = savedCategory
-            }
+            let category = trackerToEdit != nil ? selectedCategory : UserDefaults.standard.string(forKey: "selectedCategory") ?? ""
+            categorySelectionVC.savedCategory = category
             categorySelectionVC.viewModel.delegate = self
+            
             self.navigationController?.pushViewController(categorySelectionVC, animated: true)
-        }
-        else if indexPath.row == 1 && !isEvent {
+        } else if indexPath.row == 1 && !isEvent {
             let scheduleSelectionVC = ScheduleSelectionViewController()
             scheduleSelectionVC.selectedSchedule = self.schedule
             scheduleSelectionVC.delegate = self
             self.navigationController?.pushViewController(scheduleSelectionVC, animated: true)
         }
     }
-
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 75
