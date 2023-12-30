@@ -90,7 +90,7 @@ class TrackerStore: NSObject {
         guard let name = trackerCoreData.name else {
             throw TrackerStoreError.decodingErrorInvalidName
         }
-        guard let color = trackerCoreData.color else {
+        guard let colorHexString = trackerCoreData.color else {
             throw TrackerStoreError.decodingErrorInvalidColor
         }
         guard let emoji = trackerCoreData.emoji else {
@@ -100,16 +100,20 @@ class TrackerStore: NSObject {
             throw TrackerStoreError.decodingErrorInvalidSchedule
         }
         let isPinned = trackerCoreData.isPinned
+
+        // Преобразование HEX-строки в UIColor
+        let color = UIColor(hex: colorHexString)
+
         return Tracker(
             id: id,
             name: name,
-            color: color as? UIColor,
+            color: color,
             emoji: emoji,
             schedule: schedule as! [Schedule],
             isPinned: isPinned
         )
-            
     }
+
 
     func addNewTracker(_ tracker: Tracker, to category: TrackerCategory?) {
         let trackerCoreData = TrackerCoreData(context: context)
@@ -127,7 +131,7 @@ class TrackerStore: NSObject {
     func updateExistingTracker(_ trackerCoreData: TrackerCoreData, with tracker: Tracker, category: TrackerCategoryCoreData?) {
         trackerCoreData.id = tracker.id
         trackerCoreData.name = tracker.name
-        trackerCoreData.color = tracker.color
+        trackerCoreData.color = tracker.color?.toHexString()
         trackerCoreData.emoji = tracker.emoji
         trackerCoreData.schedule = tracker.schedule as NSObject
         trackerCoreData.isPinned = tracker.isPinned
@@ -147,7 +151,7 @@ class TrackerStore: NSObject {
             let results = try context.fetch(fetchRequest)
             if let trackerToUpdate = results.first {
                 trackerToUpdate.name = updatedTracker.name
-                trackerToUpdate.color = updatedTracker.color
+                trackerToUpdate.color = updatedTracker.color?.toHexString()
                 trackerToUpdate.emoji = updatedTracker.emoji
                 trackerToUpdate.schedule = updatedTracker.schedule as NSObject
                 trackerToUpdate.isPinned = updatedTracker.isPinned

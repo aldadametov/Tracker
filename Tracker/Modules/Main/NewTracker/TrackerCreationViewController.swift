@@ -238,7 +238,11 @@ final class TrackerCreationViewController: UIViewController, ScheduleSelectionDe
                 cell.contentView.backgroundColor = .ypLightGray
             }
         }
-        if let colorIndexPath = selectedColorIndexPath, UIColor.colorSelection.indices.contains(colorIndexPath.item) {
+
+        let colorHex = selectedColor.toHexString()
+
+        if let colorIndex = UIColor.colorSelection.firstIndex(where: {$0.toHexString() == colorHex}) {
+            let colorIndexPath = IndexPath(item: colorIndex, section: 1)
             emojiAndColorCollectionView.selectItem(at: colorIndexPath, animated: false, scrollPosition: [])
             if let cell = emojiAndColorCollectionView.cellForItem(at: colorIndexPath) as? ColorCollectionViewCell {
                 cell.layer.cornerRadius = 16

@@ -30,7 +30,7 @@ final class TrackerCategoryStore: NSObject {
             let trackerCoreData = TrackerCoreData(context: context)
             trackerCoreData.id = tracker.id
             trackerCoreData.name = tracker.name
-            trackerCoreData.color = tracker.color
+            trackerCoreData.color = tracker.color?.toHexString()
             trackerCoreData.emoji = tracker.emoji
             trackerCoreData.schedule = tracker.schedule as NSObject
             trackerCoreData.isPinned = tracker.isPinned
