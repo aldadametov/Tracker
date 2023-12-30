@@ -218,4 +218,36 @@ extension CategorySelectionViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 75
     }
+    
+    func tableView(_ tableView: UITableView, contextMenuConfigurationForRowAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
+           let configuration = UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { _ -> UIMenu? in
+               let editAction = UIAction(title: "Редактировать") { [weak self] _ in
+                   let categoryToEdit = self?.viewModel.categoryTitles[indexPath.row]
+                   let editVC = CategoryCreationViewController()
+                   editVC.isEditingCategory = true
+                   editVC.originalCategoryName = categoryToEdit
+                   self?.navigationController?.pushViewController(editVC, animated: true)
+               }
+
+               let deleteAction = UIAction(title: "Удалить", attributes: .destructive) { [weak self] _ in
+                   let categoryName = self?.viewModel.categoryTitles[indexPath.row]
+                   
+                   let alert = UIAlertController(title: "", message: "Эта категория точно не нужна?", preferredStyle: .actionSheet)
+                   
+                   let delete = UIAlertAction(title: "Удалить", style: .destructive) { _ in
+                       self?.viewModel.deleteCategory(named: categoryName ?? "")
+                   }
+                   
+                   let cancel = UIAlertAction(title: "Отмена", style: .cancel)
+                   
+                   alert.addAction(delete)
+                   alert.addAction(cancel)
+                   
+                   self?.present(alert, animated: true)
+               }
+
+               return UIMenu(title: "", children: [editAction, deleteAction])
+           }
+           return configuration
+       }
 }

@@ -10,6 +10,8 @@ import UIKit
 final class CategoryCreationViewController: UIViewController {
     
     private let trackerCategoryStore = TrackerCategoryStore()
+    var isEditingCategory = false
+    var originalCategoryName: String?
     
     private lazy var titleLabel: UILabel = {
         let label = UILabel()
@@ -53,6 +55,11 @@ final class CategoryCreationViewController: UIViewController {
         navigationItem.rightBarButtonItem = nil
         navigationItem.hidesBackButton = true
         
+        if isEditingCategory {
+            titleLabel.text = "Редактирование категории"
+            nameTextField.text = originalCategoryName
+        }
+        
         addSubviews()
         setupConstraints()
         hideKeyboardWhenTappedAround()
@@ -89,7 +96,15 @@ final class CategoryCreationViewController: UIViewController {
     
     @objc func doneButtonTapped() {
         guard let categoryName = nameTextField.text else { return }
-        trackerCategoryStore.addNewTrackerCategory(title: categoryName, trackers: [])
+
+        if isEditingCategory {
+            if let originalName = originalCategoryName {
+                trackerCategoryStore.updateCategory(oldTitle: originalName, newTitle: categoryName)
+            }
+        } else {
+            trackerCategoryStore.addNewTrackerCategory(title: categoryName, trackers: [])
+        }
+
         self.navigationController?.popViewController(animated: true)
     }
     

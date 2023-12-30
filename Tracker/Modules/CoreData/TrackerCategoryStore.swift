@@ -44,6 +44,36 @@ final class TrackerCategoryStore: NSObject {
         }
     }
     
+    func deleteCategory(named categoryName: String) {
+        let fetchRequest: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "title == %@", categoryName)
+
+        do {
+            let results = try context.fetch(fetchRequest)
+            if let categoryToDelete = results.first {
+                context.delete(categoryToDelete)
+                try context.save()
+            }
+        } catch {
+            print("Error deleting category: \(error)")
+        }
+    }
+    
+    func updateCategory(oldTitle: String, newTitle: String) {
+        let fetchRequest: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "title == %@", oldTitle)
+        
+        do {
+            let results = try context.fetch(fetchRequest)
+            if let categoryToUpdate = results.first {
+                categoryToUpdate.title = newTitle
+                try context.save()
+            }
+        } catch {
+            print("Error updating category: \(error)")
+        }
+    }
+    
     func fetchAllCategoriesTitles() -> [String] {
         let fetchRequest: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
 
