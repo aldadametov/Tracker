@@ -10,15 +10,16 @@ import UIKit
 final class TabBarController: UITabBarController {
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.delegate = self
         let trackerStore = TrackerStore()
         let trackerCategoryStore = TrackerCategoryStore()
         let trackerRecordStore = TrackerRecordStore()
+        let analyticsService = AnalyticsService()
 
         let trackersViewController = TrackersViewController(
             trackerStore: trackerStore,
             trackerCategoryStore: trackerCategoryStore,
-            trackerRecordStore: trackerRecordStore
+            trackerRecordStore: trackerRecordStore,
+            analyticsService: analyticsService
         )
 
         let trackersNavigationController = UINavigationController(rootViewController: trackersViewController)
@@ -54,11 +55,3 @@ final class TabBarController: UITabBarController {
     }
 }
 
-extension TabBarController: UITabBarControllerDelegate {
-    func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
-        if let viewController = viewController as? UINavigationController,
-           viewController.topViewController is StatisticsViewContoller {
-            AnalyticsService().report(event: "statistics_tab_selected", params: [:])
-        }
-    }
-}

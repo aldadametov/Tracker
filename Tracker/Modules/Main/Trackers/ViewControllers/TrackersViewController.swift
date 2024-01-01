@@ -13,15 +13,19 @@ final class TrackersViewController: UIViewController {
     private let trackerStore: TrackerStore
     private let trackerCategoryStore: TrackerCategoryStore
     private let trackerRecordStore: TrackerRecordStore
+    private let analyticsService: AnalyticsService
     private let searchBar: UISearchBar
+    
 
     init(trackerStore: TrackerStore,
          trackerCategoryStore: TrackerCategoryStore,
          trackerRecordStore: TrackerRecordStore,
+         analyticsService: AnalyticsService,
          searchBar: UISearchBar = UISearchBar()) {
         self.trackerStore = trackerStore
         self.trackerCategoryStore = trackerCategoryStore
         self.trackerRecordStore = trackerRecordStore
+        self.analyticsService = analyticsService
         self.searchBar = searchBar
         super.init(nibName: nil, bundle: nil)
     }
@@ -127,16 +131,19 @@ final class TrackersViewController: UIViewController {
         trackersCollectionView.isHidden = shouldShowNoResultsPlaceholder
     }
     @objc func addTrackerButtonTapped() {
-        AnalyticsService().report(event: "add_tracker_button_tapped", params: [:])
+        analyticsService.report(event: "click", screen: "Main", item: "add_track")
         let trackerTypeSelectionVC = TrackerTypeSelectionViewController()
         trackerTypeSelectionVC.delegate = self
         let navController = UINavigationController(rootViewController: trackerTypeSelectionVC)
         present(navController, animated: true, completion: nil)
     }
     
+    @objc func filterButtonTapped() {
+        analyticsService.report(event: "click", screen: "Main", item: "filter")
+        // todo
+    }
     
     @objc func datePickerValueChanged(sender: UIDatePicker) {
-        AnalyticsService().report(event: "date_picker_changed", params: [:])
         let selectedDate = sender.date
         let calendar = Calendar.current
         let localDate = calendar.startOfDay(for: selectedDate)
@@ -193,6 +200,7 @@ final class TrackersViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .ypWhite
+        analyticsService.report(event: "open", screen: "Main", item: nil)
 
         
         if let navBar = navigationController?.navigationBar {
@@ -217,6 +225,12 @@ final class TrackersViewController: UIViewController {
         setUpConstraints()
         hideKeyboardWhenTappedAround()
         showPlaceholder()
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+
+        analyticsService.report(event: "close", screen: "Main", item: nil)
     }
 }
 
@@ -295,6 +309,7 @@ extension TrackersViewController: UICollectionViewDelegate {
             let editAction = UIAction(title: "Редактировать") { [weak self] action in
                 guard let self = self else { return }
                 let categoryTitle = self.trackerStore.getCategoryForTracker(withId: tracker.id) ?? ""
+                analyticsService.report(event: "click", screen: "Main", item: "edit")
                 
                 let allDaysOfWeek: Set<Schedule> = [.monday, .tuesday, .wednesday, .thursday, .friday, .saturday, .sunday]
                 let isEvent = Set(tracker.schedule) == allDaysOfWeek
@@ -308,6 +323,7 @@ extension TrackersViewController: UICollectionViewDelegate {
 
             let deleteAction = UIAction(title: "Удалить", attributes: .destructive) { [weak self] action in
                 guard let self = self else { return }
+                analyticsService.report(event: "click", screen: "Main", item: "delete")
 
                 let alertController = UIAlertController(title: "", message: "Уверены что хотите удалить трекер?", preferredStyle: .actionSheet)
 
@@ -363,7 +379,6 @@ extension TrackersViewController: UISearchBarDelegate {
             isSearchActive = false
         } else {
             isSearchActive = true
-            AnalyticsService().report(event: "search_performed", params: ["search_length": searchText.count])
             
             let allTrackers = trackerStore.fetchAllTrackers()
             searchResults = allTrackers.compactMap { category in
@@ -398,6 +413,7 @@ extension TrackersViewController: TrackerCellDelegate {
         if currentDate > today {
             return
         }
+        analyticsService.report(event: "click", screen: "Main", item: "track")
         
         let isCompleted = trackerRecordStore.isTrackerCompleted(selectedTracker, on: currentDate)
         print("Is tracker completed: \(isCompleted) for tracker \(selectedTracker.id)")
