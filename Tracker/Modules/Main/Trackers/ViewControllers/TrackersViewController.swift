@@ -127,6 +127,7 @@ final class TrackersViewController: UIViewController {
         trackersCollectionView.isHidden = shouldShowNoResultsPlaceholder
     }
     @objc func addTrackerButtonTapped() {
+        AnalyticsService().report(event: "add_tracker_button_tapped", params: [:])
         let trackerTypeSelectionVC = TrackerTypeSelectionViewController()
         trackerTypeSelectionVC.delegate = self
         let navController = UINavigationController(rootViewController: trackerTypeSelectionVC)
@@ -135,6 +136,7 @@ final class TrackersViewController: UIViewController {
     
     
     @objc func datePickerValueChanged(sender: UIDatePicker) {
+        AnalyticsService().report(event: "date_picker_changed", params: [:])
         let selectedDate = sender.date
         let calendar = Calendar.current
         let localDate = calendar.startOfDay(for: selectedDate)
@@ -361,6 +363,8 @@ extension TrackersViewController: UISearchBarDelegate {
             isSearchActive = false
         } else {
             isSearchActive = true
+            AnalyticsService().report(event: "search_performed", params: ["search_length": searchText.count])
+            
             let allTrackers = trackerStore.fetchAllTrackers()
             searchResults = allTrackers.compactMap { category in
                 let matchingTrackers = category.trackers.filter { $0.name.lowercased().contains(searchText.lowercased()) }
