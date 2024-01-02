@@ -427,6 +427,7 @@ extension TrackersViewController: TrackerCellDelegate {
             trackerRecordStore.addNewTrackerRecord(newRecord, for: selectedTracker)
         }
         trackersCollectionView.reloadItems(at: [indexPath])
+        NotificationCenter.default.post(name: .didUpdateTrackerData, object: nil)
     }
 }
 

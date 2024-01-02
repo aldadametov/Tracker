@@ -15,6 +15,7 @@
 		03791B2B2B09F12600FECA0E /* TrackersModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 03791B292B09F12600FECA0E /* TrackersModel.xcdatamodeld */; };
 		03791B5D2B0BEEA500FECA0E /* ScheduleArrayTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03791B5C2B0BEEA500FECA0E /* ScheduleArrayTransformer.swift */; };
 		037984182B41B14E00DDF5F8 /* AnalyticsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 037984172B41B14E00DDF5F8 /* AnalyticsService.swift */; };
+		038B15E62B43F4D300C3536D /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 038B15E52B43F4D300C3536D /* Helpers.swift */; };
 		03A346992AA66CFE00429578 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03A346982AA66CFE00429578 /* AppDelegate.swift */; };
 		03A3469B2AA66CFE00429578 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03A3469A2AA66CFE00429578 /* SceneDelegate.swift */; };
 		03A346A02AA66CFE00429578 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 03A3469E2AA66CFE00429578 /* Main.storyboard */; };
@@ -73,6 +74,7 @@
 		03791B2A2B09F12600FECA0E /* TrackersDB.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = TrackersDB.xcdatamodel; sourceTree = "<group>"; };
 		03791B5C2B0BEEA500FECA0E /* ScheduleArrayTransformer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleArrayTransformer.swift; sourceTree = "<group>"; };
 		037984172B41B14E00DDF5F8 /* AnalyticsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsService.swift; sourceTree = "<group>"; };
+		038B15E52B43F4D300C3536D /* Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helpers.swift; sourceTree = "<group>"; };
 		03A346952AA66CFE00429578 /* Tracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Tracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		03A346982AA66CFE00429578 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		03A3469A2AA66CFE00429578 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -262,6 +264,7 @@
 			children = (
 				03A8BA472AB5BB2200C9A534 /* Extension + UIColor.swift */,
 				03C595A52B040C6100D80E16 /* Extension + UIViewController.swift */,
+				038B15E52B43F4D300C3536D /* Helpers.swift */,
 				03A346A12AA66CFF00429578 /* Assets.xcassets */,
 				03D68A722AF8E82A0022D910 /* SF-Pro.ttf */,
 				03A8F30C2B3AE7A900F9FDF7 /* Localizable.strings */,
@@ -544,6 +547,7 @@
 				0330E5A12B12793F00CE0800 /* TrackerRecordStore.swift in Sources */,
 				03A8BA402AB3135A00C9A534 /* TrackerCreationViewController.swift in Sources */,
 				03A8F2DA2B36BC2B00F9FDF7 /* CategoryCreationViewController.swift in Sources */,
+				038B15E62B43F4D300C3536D /* Helpers.swift in Sources */,
 				03C595A62B040C6100D80E16 /* Extension + UIViewController.swift in Sources */,
 				03C595AC2B04CDA600D80E16 /* SectionHeaderColectionReusableView.swift in Sources */,
 				03A8F2D52B34C73B00F9FDF7 /* RedBackgroundVC.swift in Sources */,
