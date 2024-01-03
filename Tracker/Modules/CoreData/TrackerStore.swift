@@ -101,7 +101,7 @@ class TrackerStore: NSObject {
         }
         let isPinned = trackerCoreData.isPinned
 
-        // Преобразование HEX-строки в UIColor
+        
         let color = UIColor(hex: colorHexString)
 
         return Tracker(

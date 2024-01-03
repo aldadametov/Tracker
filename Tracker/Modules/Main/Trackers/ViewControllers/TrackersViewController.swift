@@ -269,17 +269,14 @@ final class TrackersViewController: UIViewController {
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
         
-        // Проверяем, изменилась ли тема
         if self.traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
             updateSearchBarPlaceholderStyle()
         }
     }
     
     private func updateSearchBarPlaceholderStyle() {
-        // Определяем цвет плейсхолдера в зависимости от темы
         let placeholderColor = traitCollection.userInterfaceStyle == .dark ? UIColor.ypBlack : UIColor.ypGray
 
-        // Создаем NSAttributedString с нужным цветом
         let attributes: [NSAttributedString.Key: Any] = [
             .foregroundColor: placeholderColor
         ]
@@ -287,10 +284,8 @@ final class TrackersViewController: UIViewController {
         searchBar.placeholder = NSLocalizedString("search", comment: "placeholder text for searchBar")
         searchBar.searchTextField.attributedPlaceholder = NSAttributedString(string: searchBar.placeholder ?? "", attributes: attributes)
 
-        // Определяем цвет иконки лупы
         let iconColor = traitCollection.userInterfaceStyle == .dark ? UIColor.ypBlack : UIColor.ypGray
 
-        // Устанавливаем цвет иконки лупы
         searchBar.setImage(UIImage(systemName: "magnifyingglass")?.withTintColor(iconColor, renderingMode: .alwaysOriginal), for: .search, state: .normal)
     }
     

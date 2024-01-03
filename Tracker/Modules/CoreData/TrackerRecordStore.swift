@@ -136,13 +136,11 @@ extension TrackerRecordStore {
 
             for result in results {
                 if let date = result["date"] as? Date {
-                    let dayStart = Calendar.current.startOfDay(for: date)
-
-                    let activeTrackersCount = trackerStore.filteredTrackers(for: dayStart).flatMap { $0.trackers }.count
+                    let activeTrackersCount = trackerStore.filteredTrackers(for: date).flatMap { $0.trackers }.count
 
                     let completedFetchRequest: NSFetchRequest<NSNumber> = NSFetchRequest(entityName: "TrackerRecordCoreData")
                     completedFetchRequest.resultType = .countResultType
-                    completedFetchRequest.predicate = NSPredicate(format: "date == %@", dayStart as NSDate)
+                    completedFetchRequest.predicate = NSPredicate(format: "date == %@", date as NSDate)
 
                     let completedCount = try context.count(for: completedFetchRequest)
 
@@ -158,6 +156,8 @@ extension TrackerRecordStore {
             return 0
         }
     }
+
+
     
     func averageCompletedTrackers() -> Int {
         let completedCountRequest: NSFetchRequest<NSNumber> = NSFetchRequest(entityName: "TrackerRecordCoreData")

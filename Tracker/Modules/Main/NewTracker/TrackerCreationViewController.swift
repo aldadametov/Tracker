@@ -402,10 +402,10 @@ final class TrackerCreationViewController: UIViewController, ScheduleSelectionDe
         let isButtonEnabled = !isNameTextFieldEmpty && isScheduleSelected && isEmojiSelected && isColorSelected && isCategorySelected
         createButton.isEnabled = isButtonEnabled
         if isButtonEnabled {
-            createButton.backgroundColor = .ypBlack // Цвет фона для активного состояния
-            createButton.setTitleColor(.ypWhite, for: .normal) // Цвет текста для активного состояния
+            createButton.backgroundColor = .ypBlack
+            createButton.setTitleColor(.ypWhite, for: .normal)
         } else {
-            createButton.backgroundColor = .ypGray // Цвет фона для неактивного состояния
+            createButton.backgroundColor = .ypGray 
         }
     }
     
