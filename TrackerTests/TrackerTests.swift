@@ -27,6 +27,8 @@ class MockTrackerStore: TrackerStore {
 }
 
 final class TrackerTests: XCTestCase {
+    
+    
     func testTrackersViewControllerWithEmptyState() {
         let mockStore = MockTrackerStore()
         mockStore.testTrackers = []
@@ -34,9 +36,9 @@ final class TrackerTests: XCTestCase {
         let viewController = TrackersViewController(
             trackerStore: mockStore,
             trackerCategoryStore: TrackerCategoryStore(),
-            trackerRecordStore: TrackerRecordStore()
+            trackerRecordStore: TrackerRecordStore(), 
+            analyticsService: AnalyticsService()
         )
-        
         assertSnapshot(matching: viewController, as: .image(on: .iPhoneX))
     }
     
@@ -64,9 +66,9 @@ final class TrackerTests: XCTestCase {
         let viewController = TrackersViewController(
             trackerStore: mockStore,
             trackerCategoryStore: TrackerCategoryStore(),
-            trackerRecordStore: TrackerRecordStore()
+            trackerRecordStore: TrackerRecordStore(), 
+            analyticsService: AnalyticsService ()
         )
-        
         assertSnapshot(matching: viewController, as: .image(on: .iPhoneX))
     }
     
@@ -87,13 +89,14 @@ final class TrackerTests: XCTestCase {
             trackerStore: mockStore,
             trackerCategoryStore: TrackerCategoryStore(),
             trackerRecordStore: TrackerRecordStore(),
+            analyticsService: AnalyticsService (),
             searchBar: mockSearchBar
         )
         viewController.loadViewIfNeeded()
         
         mockSearchBar.text = "Пройти"
         viewController.searchBar(mockSearchBar, textDidChange: "Пройти")
-        
+
         assertSnapshot(matching: viewController, as: .image(on: .iPhoneX))
     }
     
@@ -106,13 +109,14 @@ final class TrackerTests: XCTestCase {
             trackerStore: mockStore,
             trackerCategoryStore: TrackerCategoryStore(),
             trackerRecordStore: TrackerRecordStore(),
+            analyticsService: AnalyticsService (),
             searchBar: mockSearchBar
         )
         viewController.loadViewIfNeeded()
         
         mockSearchBar.text = "Пройти"
         viewController.searchBar(mockSearchBar, textDidChange: "Пройти")
-        
+
         assertSnapshot(matching: viewController, as: .image(on: .iPhoneX))
     }
 }

@@ -49,7 +49,7 @@ class FiltersViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
+        view.backgroundColor = .ypWhite
         
         let savedFilterIndex = UserDefaults.standard.integer(forKey: "selectedFilter")
         lastSelectedIndexPath = IndexPath(row: savedFilterIndex, section: 0)
@@ -61,6 +61,7 @@ class FiltersViewController: UIViewController {
         
         addSubviews()
         setupConstraints()
+        filtersTableView.separatorColor = .ypGray
     }
     private func addSubviews() {
         view.addSubview(titleLabel)

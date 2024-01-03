@@ -21,6 +21,8 @@ final class ScheduleTableViewCell: UITableViewCell {
         let toggleSwitch = UISwitch()
         toggleSwitch.translatesAutoresizingMaskIntoConstraints = false
         toggleSwitch.onTintColor = .ypBlue
+        toggleSwitch.backgroundColor = UIColor.ypLightGray
+        toggleSwitch.layer.cornerRadius = toggleSwitch.frame.height / 2
         return toggleSwitch
     }()
     

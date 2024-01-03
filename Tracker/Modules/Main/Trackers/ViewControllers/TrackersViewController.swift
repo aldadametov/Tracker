@@ -49,6 +49,10 @@ final class TrackersViewController: UIViewController {
         datePicker.calendar = Calendar.current
         datePicker.calendar.firstWeekday = 2
         datePicker.addTarget(self, action: #selector(datePickerValueChanged), for: .valueChanged)
+        datePicker.backgroundColor = .white
+        datePicker.layer.cornerRadius = 8
+        datePicker.layer.masksToBounds = true
+        datePicker.overrideUserInterfaceStyle = .light
         return datePicker
     }()
     
@@ -128,9 +132,6 @@ final class TrackersViewController: UIViewController {
     private func showPlaceholder() {
         let hasNoTrackersForCurrentDate = trackerStore.filteredTrackers(for: currentDate).isEmpty
         let shouldShow = !isSearchActive && hasNoTrackersForCurrentDate && (currentFilter == .allTrackers || currentFilter == .trackersForToday)
-
-        print("ShowPlaceholder: \(shouldShow), isSearchActive: \(isSearchActive), hasNoTrackersForCurrentDate: \(hasNoTrackersForCurrentDate), currentFilter: \(currentFilter)")
-
         noTrackersCreatedLabel.isHidden = !shouldShow
         noTrackersCreatedImageView.isHidden = !shouldShow
         filtersButton.isHidden = shouldShow
@@ -167,7 +168,6 @@ final class TrackersViewController: UIViewController {
         let calendar = Calendar.current
         let localDate = calendar.startOfDay(for: selectedDate)
         currentDate = localDate
-        print("DatePicker changed: \(currentDate)")
         updateFilteredCategories()
         trackersCollectionView.reloadData()
         showPlaceholder()
@@ -228,13 +228,15 @@ final class TrackersViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .ypWhite
+        updateSearchBarPlaceholderStyle()
+
         analyticsService.report(event: "open", screen: "Main", item: nil)
 
-        
         if let navBar = navigationController?.navigationBar {
-            navBar.tintColor = UIColor.black
+            navBar.tintColor = .white
             let customImage = UIImage(named: "Add tracker")
             let leftButton = UIBarButtonItem(image: customImage, style: .plain, target: self, action: #selector(addTrackerButtonTapped))
+            leftButton.tintColor = .ypBlack
             navBar.topItem?.setLeftBarButton(leftButton, animated: false)
             navBar.topItem?.setRightBarButton(UIBarButtonItem(customView: datePicker), animated: false)
         }
@@ -262,6 +264,34 @@ final class TrackersViewController: UIViewController {
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         analyticsService.report(event: "close", screen: "Main", item: nil)
+    }
+    
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        
+        // Проверяем, изменилась ли тема
+        if self.traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+            updateSearchBarPlaceholderStyle()
+        }
+    }
+    
+    private func updateSearchBarPlaceholderStyle() {
+        // Определяем цвет плейсхолдера в зависимости от темы
+        let placeholderColor = traitCollection.userInterfaceStyle == .dark ? UIColor.ypBlack : UIColor.ypGray
+
+        // Создаем NSAttributedString с нужным цветом
+        let attributes: [NSAttributedString.Key: Any] = [
+            .foregroundColor: placeholderColor
+        ]
+
+        searchBar.placeholder = NSLocalizedString("search", comment: "placeholder text for searchBar")
+        searchBar.searchTextField.attributedPlaceholder = NSAttributedString(string: searchBar.placeholder ?? "", attributes: attributes)
+
+        // Определяем цвет иконки лупы
+        let iconColor = traitCollection.userInterfaceStyle == .dark ? UIColor.ypBlack : UIColor.ypGray
+
+        // Устанавливаем цвет иконки лупы
+        searchBar.setImage(UIImage(systemName: "magnifyingglass")?.withTintColor(iconColor, renderingMode: .alwaysOriginal), for: .search, state: .normal)
     }
     
     private func updateFilteredCategories() {
@@ -466,7 +496,6 @@ extension TrackersViewController: UISearchBarDelegate {
 extension TrackersViewController: TrackerCellDelegate {
     
     func addButtonTappedForTracker(at indexPath: IndexPath) {
-        print("Current date: \(currentDate)")
         
         let selectedTracker = filteredCategories[indexPath.section].trackers[indexPath.row]
         
@@ -477,13 +506,10 @@ extension TrackersViewController: TrackerCellDelegate {
         analyticsService.report(event: "click", screen: "Main", item: "track")
         
         let isCompleted = trackerRecordStore.isTrackerCompleted(selectedTracker, on: currentDate)
-        print("Is tracker completed: \(isCompleted) for tracker \(selectedTracker.id)")
-        
+       
         if isCompleted {
-            print("Deleting tracker record for \(selectedTracker.id)")
             trackerRecordStore.deleteTrackerRecord(for: selectedTracker, on: currentDate)
         } else {
-            print("Adding new tracker record for \(selectedTracker.id)")
             let newRecord = TrackerRecord(id: selectedTracker.id, date: currentDate)
             trackerRecordStore.addNewTrackerRecord(newRecord, for: selectedTracker)
         }
@@ -524,7 +550,6 @@ extension TrackersViewController: TrackerStoreDelegate {
 extension TrackersViewController: FiltersViewControllerDelegate {
     func didSelectFilter(_ filterType: FilterType) {
         currentFilter = filterType
-        print("Filter selected: \(filterType)")
         if filterType == .trackersForToday {
             currentDate = Date()
             datePicker.date = currentDate

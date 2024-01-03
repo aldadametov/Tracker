@@ -47,7 +47,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     
     private let pinImageView: UIImageView = {
         let imageView = UIImageView()
-        imageView.image = UIImage(named: "pin") 
+        imageView.image = UIImage(named: "pin")
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.isHidden = true
         return imageView
@@ -56,7 +56,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     let trackerLabel: UILabel = {
         let label = UILabel()
         label.frame = CGRect(x: 0, y: 0, width: 143, height: 34)
-        label.textColor = .ypWhite
+        label.textColor = .white
         label.font = UIFont(name: "SFPro-Medium", size: 12)
         label.numberOfLines = 2
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -84,7 +84,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         let button = UIButton()
         button.frame = CGRect(x: 0, y: 0, width: 34, height: 34)
         button.setImage(UIImage(systemName: "plus"), for: .normal)
-        button.tintColor = .white 
+        button.tintColor = .white
         button.layer.cornerRadius = 17
         button.translatesAutoresizingMaskIntoConstraints = false
         return button

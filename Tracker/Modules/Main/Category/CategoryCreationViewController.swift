@@ -26,7 +26,6 @@ final class CategoryCreationViewController: UIViewController {
     
     private lazy var nameTextField: UITextField = {
         let textField = UITextField()
-        textField.placeholder = "Введите название категории"
         textField.backgroundColor = .ypBackgroundDay
         textField.font = UIFont(name: "SFPro-Regular", size: 17)
         textField.layer.cornerRadius = 16
@@ -36,6 +35,12 @@ final class CategoryCreationViewController: UIViewController {
         let paddingView = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: textField.frame.height))
         textField.leftView = paddingView
         textField.leftViewMode = .always
+        
+        let placeholderText = "Введите название категории"
+        textField.attributedPlaceholder = NSAttributedString(
+            string: placeholderText,
+            attributes: [NSAttributedString.Key.foregroundColor: UIColor.ypGray]
+        )
         return textField
     }()
     
@@ -51,7 +56,7 @@ final class CategoryCreationViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
+        view.backgroundColor = .ypWhite
         navigationItem.rightBarButtonItem = nil
         navigationItem.hidesBackButton = true
         
@@ -116,7 +121,12 @@ final class CategoryCreationViewController: UIViewController {
         let isNameTextFieldEmpty = nameTextField.text?.isEmpty ?? true
         let isButtonEnabled = !isNameTextFieldEmpty
         doneButton.isEnabled = isButtonEnabled
-        doneButton.backgroundColor = isButtonEnabled ? .ypBlack : .ypGray
+        if isButtonEnabled {
+            doneButton.backgroundColor = .ypBlack
+            doneButton.setTitleColor(.ypWhite, for: .normal)
+        } else {
+            doneButton.backgroundColor = .ypGray
+        }
     }
     
 }

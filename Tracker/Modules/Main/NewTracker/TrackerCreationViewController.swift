@@ -87,7 +87,6 @@ final class TrackerCreationViewController: UIViewController, ScheduleSelectionDe
     
     private let nameTextField: UITextField = {
         let textField = UITextField()
-        textField.placeholder = "Введите название трекера"
         textField.backgroundColor = .ypBackgroundDay
         textField.font = UIFont(name: "SFPro-Regular", size: 17)
         textField.layer.cornerRadius = 16
@@ -97,6 +96,12 @@ final class TrackerCreationViewController: UIViewController, ScheduleSelectionDe
         let paddingView = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: textField.frame.height))
         textField.leftView = paddingView
         textField.leftViewMode = .always
+
+        let placeholderText = "Введите название трекера"
+        textField.attributedPlaceholder = NSAttributedString(
+            string: placeholderText,
+            attributes: [NSAttributedString.Key.foregroundColor: UIColor.ypGray]
+        )
         return textField
     }()
     
@@ -172,7 +177,7 @@ final class TrackerCreationViewController: UIViewController, ScheduleSelectionDe
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
+        view.backgroundColor = .ypWhite
         if let _ = trackerToEdit {
         } else {
             selectedCategory = UserDefaults.standard.string(forKey: "selectedCategory") ?? ""
@@ -184,6 +189,7 @@ final class TrackerCreationViewController: UIViewController, ScheduleSelectionDe
         configureInitialValues()
         setupActions()
         hideKeyboardWhenTappedAround()
+        tableView.separatorColor = .ypGray
         DispatchQueue.main.async {
             self.selectInitialCollectionViewItems()
         }
@@ -395,7 +401,12 @@ final class TrackerCreationViewController: UIViewController, ScheduleSelectionDe
         
         let isButtonEnabled = !isNameTextFieldEmpty && isScheduleSelected && isEmojiSelected && isColorSelected && isCategorySelected
         createButton.isEnabled = isButtonEnabled
-        createButton.backgroundColor = isButtonEnabled ? .ypBlack : .ypGray
+        if isButtonEnabled {
+            createButton.backgroundColor = .ypBlack // Цвет фона для активного состояния
+            createButton.setTitleColor(.ypWhite, for: .normal) // Цвет текста для активного состояния
+        } else {
+            createButton.backgroundColor = .ypGray // Цвет фона для неактивного состояния
+        }
     }
     
     
@@ -456,10 +467,10 @@ extension TrackerCreationViewController: UITableViewDelegate, UITableViewDataSou
             cell.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16 )
         } else if indexPath.row == 1 && !isEvent {
             cell.configure(title: "Расписание", description: scheduleDescription())
-            cell.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 375)
+            cell.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 400)
         } else {
             cell.configure(title: "Категория", description: selectedCategory)
-            cell.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 375)
+            cell.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 400)
         }
         return cell
     }

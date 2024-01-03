@@ -19,6 +19,7 @@ final class TrackerTypeSelectionViewController: UIViewController {
         let button = UIButton()
         button.setTitle("Привычка", for: .normal)
         button.titleLabel?.font = UIFont(name: "SFPro-Medium", size: 16)
+        button.setTitleColor(.ypWhite, for: .normal)
         button.frame = CGRect(x: 0, y: 0, width: 335, height: 60)
         button.backgroundColor = .ypBlack
         button.layer.cornerRadius = 16
@@ -30,6 +31,7 @@ final class TrackerTypeSelectionViewController: UIViewController {
         let button = UIButton()
         button.setTitle("Нерегулярное событие", for: .normal)
         button.titleLabel?.font = UIFont(name: "SFPro-Medium", size: 16)
+        button.setTitleColor(.ypWhite, for: .normal)
         button.frame = CGRect(x: 0, y: 0, width: 335, height: 60)
         button.backgroundColor = .ypBlack
         button.layer.cornerRadius = 16
@@ -39,7 +41,7 @@ final class TrackerTypeSelectionViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
+        view.backgroundColor = .ypWhite
 
         view.addSubview(titleLabel)
         view.addSubview(habitButton)

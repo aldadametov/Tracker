@@ -66,7 +66,7 @@ final class StatisticsViewContoller: UIViewController {
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.isHidden = true
         return imageView
-    }()    
+    }()
     
     private lazy var noStatisticsLabel: UILabel = {
         let label = UILabel()
@@ -81,7 +81,7 @@ final class StatisticsViewContoller: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
+        view.backgroundColor = .ypWhite
         updateStatistics()
         addSubviews()
         setupConstraints()

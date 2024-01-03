@@ -45,6 +45,7 @@ final class ScheduleSelectionViewController: UIViewController {
         button.translatesAutoresizingMaskIntoConstraints = false
         button.backgroundColor = .ypBlack
         button.setTitle("Готово", for: .normal)
+        button.setTitleColor(.ypWhite, for: .normal)
         button.titleLabel?.font = UIFont(name: "SFPro-Medium", size: 16)
         button.layer.cornerRadius = 16
         return button
@@ -57,11 +58,12 @@ final class ScheduleSelectionViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
+        view.backgroundColor = .ypWhite
         
         tableView.delegate = self
         tableView.dataSource = self
         tableView.register(ScheduleTableViewCell.self, forCellReuseIdentifier: "ScheduleCell")
+        tableView.separatorColor = .ypGray
         
         view.addSubview(titleLabel)
         view.addSubview(tableView)
@@ -74,6 +76,7 @@ final class ScheduleSelectionViewController: UIViewController {
         
         doneButton.addTarget(self, action: #selector(doneButtonTapped), for: .touchUpInside)
     }
+
     
     private func setupConstraints() {
         NSLayoutConstraint.activate([
