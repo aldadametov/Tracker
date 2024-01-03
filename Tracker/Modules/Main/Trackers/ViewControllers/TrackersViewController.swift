@@ -125,28 +125,21 @@ final class TrackersViewController: UIViewController {
         return button
     }()
     
-    private func showPlaceholder() -> Bool {
-        let hasTrackersForCurrentDate = !trackerStore.filteredTrackers(for: currentDate).isEmpty
-        let shouldShow = !isSearchActive && hasTrackersForCurrentDate
+    private func showPlaceholder() {
+        let hasNoTrackersForCurrentDate = trackerStore.filteredTrackers(for: currentDate).isEmpty
+        let shouldShow = !isSearchActive && hasNoTrackersForCurrentDate && (currentFilter == .allTrackers || currentFilter == .trackersForToday)
 
-        noTrackersCreatedLabel.isHidden = shouldShow
-        noTrackersCreatedImageView.isHidden = shouldShow
-        trackersCollectionView.isHidden = !shouldShow
-        filtersButton.isHidden = !shouldShow
+        print("ShowPlaceholder: \(shouldShow), isSearchActive: \(isSearchActive), hasNoTrackersForCurrentDate: \(hasNoTrackersForCurrentDate), currentFilter: \(currentFilter)")
 
-        return !shouldShow
+        noTrackersCreatedLabel.isHidden = !shouldShow
+        noTrackersCreatedImageView.isHidden = !shouldShow
+        filtersButton.isHidden = shouldShow
     }
 
     private func showNoResultsPlaceholder() {
-        if showPlaceholder() {
-            noTrackersFoundLabel.isHidden = true
-            noTrackersFoundImageView.isHidden = true
-            return
-        }
-
-        let noTrackersAfterFilter = !isSearchActive && filteredCategories.isEmpty
         let noResultsFromSearch = isSearchActive && searchResults.isEmpty
-        let shouldShowNoResultsPlaceholder = noTrackersAfterFilter || noResultsFromSearch
+        let noTrackersAfterFilter = !isSearchActive && filteredCategories.isEmpty && (currentFilter == .completed || currentFilter == .notCompleted)
+        let shouldShowNoResultsPlaceholder = noResultsFromSearch || noTrackersAfterFilter
 
         noTrackersFoundLabel.isHidden = !shouldShowNoResultsPlaceholder
         noTrackersFoundImageView.isHidden = !shouldShowNoResultsPlaceholder
@@ -174,6 +167,7 @@ final class TrackersViewController: UIViewController {
         let calendar = Calendar.current
         let localDate = calendar.startOfDay(for: selectedDate)
         currentDate = localDate
+        print("DatePicker changed: \(currentDate)")
         updateFilteredCategories()
         trackersCollectionView.reloadData()
         showPlaceholder()
@@ -184,11 +178,11 @@ final class TrackersViewController: UIViewController {
     private func addSubViews() {
         view.addSubview(searchBar)
         view.addSubview(trackersLabel)
+        view.addSubview(trackersCollectionView)
         view.addSubview(noTrackersCreatedImageView)
         view.addSubview(noTrackersCreatedLabel)
         view.addSubview(noTrackersFoundImageView)
         view.addSubview(noTrackersFoundLabel)
-        view.addSubview(trackersCollectionView)
         view.addSubview(filtersButton)
     }
     
@@ -258,8 +252,9 @@ final class TrackersViewController: UIViewController {
         addSubViews()
         setUpConstraints()
         hideKeyboardWhenTappedAround()
-        showPlaceholder()
         updateFilteredCategories()
+        showPlaceholder()
+        showNoResultsPlaceholder()
         
         filtersButton.addTarget(self, action: #selector(filterButtonTapped), for: .touchUpInside )
     }
@@ -297,7 +292,6 @@ final class TrackersViewController: UIViewController {
                 return category.trackers.contains { !trackerRecordStore.isTrackerCompleted($0, on: currentDate) }
             }
         }
-
         return filteredCategories[section].title
     }
 }
@@ -494,6 +488,7 @@ extension TrackersViewController: TrackerCellDelegate {
             trackerRecordStore.addNewTrackerRecord(newRecord, for: selectedTracker)
         }
         NotificationCenter.default.post(name: .didUpdateTrackerData, object: nil)
+        showPlaceholder()
         showNoResultsPlaceholder()
     }
 }
@@ -519,8 +514,8 @@ extension TrackersViewController: TrackerStoreDelegate {
     func store(_ store: TrackerStore, didUpdate update: TrackerStoreUpdate) {
         updateFilteredCategories()
         trackersCollectionView.reloadData()
-        showNoResultsPlaceholder()
         showPlaceholder()
+        showNoResultsPlaceholder()
     }
 }
 
@@ -529,7 +524,7 @@ extension TrackersViewController: TrackerStoreDelegate {
 extension TrackersViewController: FiltersViewControllerDelegate {
     func didSelectFilter(_ filterType: FilterType) {
         currentFilter = filterType
-
+        print("Filter selected: \(filterType)")
         if filterType == .trackersForToday {
             currentDate = Date()
             datePicker.date = currentDate
