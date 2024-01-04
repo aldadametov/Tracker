@@ -11,7 +11,8 @@ import UIKit
 
 final class TrackerCategoryStore: NSObject {
     private let context: NSManagedObjectContext
-    
+    private let pinnedCategoryTitle = "Закрепленные"
+
     convenience override init() {
         let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
         self.init(context: context)
@@ -79,7 +80,8 @@ final class TrackerCategoryStore: NSObject {
 
         do {
             let categories = try context.fetch(fetchRequest)
-            return categories.map { $0.title ?? "" }
+            return categories.compactMap { $0.title }
+                          .filter { $0 != pinnedCategoryTitle } 
         } catch {
             print("Error fetching categories: \(error)")
             return []

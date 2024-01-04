@@ -20,6 +20,18 @@ protocol FiltersViewControllerDelegate: AnyObject {
 
 class FiltersViewController: UIViewController {
     
+    private var currentFilter: FilterType
+
+    init(currentFilter: FilterType) {
+        self.currentFilter = currentFilter
+        super.init(nibName: nil, bundle: nil)
+        self.lastSelectedIndexPath = IndexPath(row: currentFilter.rawValue, section: 0)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     private let filterTitles = ["Все трекеры", "Трекеры на сегодня", "Завершённые", "Незавершённые"]
     weak var delegate: FiltersViewControllerDelegate?
     
@@ -50,10 +62,6 @@ class FiltersViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .ypWhite
-        
-        let savedFilterIndex = UserDefaults.standard.integer(forKey: "selectedFilter")
-        lastSelectedIndexPath = IndexPath(row: savedFilterIndex, section: 0)
-        
         
         filtersTableView.delegate = self
         filtersTableView.dataSource = self
@@ -118,9 +126,7 @@ extension FiltersViewController: UITableViewDelegate {
             cell.accessoryType = .checkmark
             cell.tintColor = .systemBlue
         }
-        
-        UserDefaults.standard.set(indexPath.row, forKey: "selectedFilter")
-        
+                
         lastSelectedIndexPath = indexPath
         
         guard let filterType = FilterType(rawValue: indexPath.row) else { return }

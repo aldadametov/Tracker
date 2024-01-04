@@ -49,6 +49,7 @@ final class TrackersViewController: UIViewController {
         datePicker.calendar = Calendar.current
         datePicker.calendar.firstWeekday = 2
         datePicker.addTarget(self, action: #selector(datePickerValueChanged), for: .valueChanged)
+        datePicker.tintColor = .ypBlue
         datePicker.backgroundColor = .white
         datePicker.layer.cornerRadius = 8
         datePicker.layer.masksToBounds = true
@@ -158,7 +159,7 @@ final class TrackersViewController: UIViewController {
     
     @objc func filterButtonTapped() {
         analyticsService.report(event: "click", screen: "Main", item: "filter")
-        let filtersVC = FiltersViewController()
+        let filtersVC = FiltersViewController(currentFilter: currentFilter)
         filtersVC.delegate = self
         present(filtersVC, animated: true, completion: nil)
     }
