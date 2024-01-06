@@ -69,6 +69,7 @@ final class CategorySelectionViewController: UIViewController {
     private lazy var addCategoryButton: UIButton = {
         let button = UIButton()
         button.setTitle("Добавить категорию", for: .normal)
+        button.setTitleColor(.ypWhite, for: .normal)
         button.backgroundColor = .ypBlack
         button.titleLabel?.font = UIFont(name: "SFPro-Medium", size: 16)
         button.layer.cornerRadius = 16
@@ -84,7 +85,7 @@ final class CategorySelectionViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
+        view.backgroundColor = .ypWhite
         navigationItem.rightBarButtonItem = nil
         navigationItem.hidesBackButton = true
         
@@ -103,6 +104,7 @@ final class CategorySelectionViewController: UIViewController {
         setupConstraints()
         setupTableView()
         
+        
         addCategoryButton.addTarget(self, action: #selector(addCategoryButtonTapped), for: .touchUpInside )
     }
     
@@ -117,6 +119,7 @@ final class CategorySelectionViewController: UIViewController {
         cateoryTableView.delegate = self
         cateoryTableView.dataSource = self
         cateoryTableView.register(CategoryTableViewCell.self, forCellReuseIdentifier: "categoryCell")
+        cateoryTableView.separatorColor = .ypGray
     }
     
     private func addSubviews() {
@@ -218,4 +221,36 @@ extension CategorySelectionViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 75
     }
+    
+    func tableView(_ tableView: UITableView, contextMenuConfigurationForRowAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
+           let configuration = UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { _ -> UIMenu? in
+               let editAction = UIAction(title: "Редактировать") { [weak self] _ in
+                   let categoryToEdit = self?.viewModel.categoryTitles[indexPath.row]
+                   let editVC = CategoryCreationViewController()
+                   editVC.isEditingCategory = true
+                   editVC.originalCategoryName = categoryToEdit
+                   self?.navigationController?.pushViewController(editVC, animated: true)
+               }
+
+               let deleteAction = UIAction(title: "Удалить", attributes: .destructive) { [weak self] _ in
+                   let categoryName = self?.viewModel.categoryTitles[indexPath.row]
+                   
+                   let alert = UIAlertController(title: "", message: "Эта категория точно не нужна?", preferredStyle: .actionSheet)
+                   
+                   let delete = UIAlertAction(title: "Удалить", style: .destructive) { _ in
+                       self?.viewModel.deleteCategory(named: categoryName ?? "")
+                   }
+                   
+                   let cancel = UIAlertAction(title: "Отмена", style: .cancel)
+                   
+                   alert.addAction(delete)
+                   alert.addAction(cancel)
+                   
+                   self?.present(alert, animated: true)
+               }
+
+               return UIMenu(title: "", children: [editAction, deleteAction])
+           }
+           return configuration
+       }
 }

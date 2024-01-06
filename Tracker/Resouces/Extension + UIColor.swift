@@ -13,7 +13,6 @@ extension UIColor {
     static var ypRed: UIColor { UIColor(named: "YP Red") ?? UIColor.red }
     static var ypBlack: UIColor { UIColor(named: "YP Black") ?? UIColor.black}
     static var ypBackgroundDay: UIColor { UIColor(named: "YP BackgroundDay") ?? UIColor.lightGray }
-    static var ypBackgroundNight: UIColor { UIColor(named: "YP BackgroundNight") ?? UIColor.darkGray }
     static var ypGray: UIColor { UIColor(named: "YP Gray") ?? UIColor.gray }
     static var ypLightGray: UIColor { UIColor(named: "YP LightGray") ?? UIColor.lightGray }
     static var ypWhite: UIColor { UIColor(named: "YP White") ?? UIColor.white}
@@ -38,6 +37,34 @@ extension UIColor {
         UIColor(named: "Color Selection 18") ?? .green
     ]
 }
+
+extension UIColor {
+    func toHexString() -> String {
+        var r: CGFloat = 0
+        var g: CGFloat = 0
+        var b: CGFloat = 0
+        var a: CGFloat = 0
+        
+        self.getRed(&r, green: &g, blue: &b, alpha: &a)
+        
+        return String(format: "%02X%02X%02X", Int(r * 255), Int(g * 255), Int(b * 255))
+    }
+
+    convenience init(hex: String) {
+        var hexSanitized = hex.trimmingCharacters(in: .whitespacesAndNewlines)
+        hexSanitized = hexSanitized.replacingOccurrences(of: "#", with: "")
+
+        var rgb: UInt64 = 0
+        Scanner(string: hexSanitized).scanHexInt64(&rgb)
+
+        let red = CGFloat((rgb & 0xFF0000) >> 16) / 255.0
+        let green = CGFloat((rgb & 0x00FF00) >> 8) / 255.0
+        let blue = CGFloat(rgb & 0x0000FF) / 255.0
+
+        self.init(red: red, green: green, blue: blue, alpha: 1.0)
+    }
+}
+
 
 
 

@@ -21,7 +21,7 @@ final class BlueBackgroundVC: UIViewController {
         let label = UILabel()
         label.text = "Отслеживайте только то, что хотите"
         label.font = UIFont(name: "SFPro-Bold", size: 32)
-        label.textColor = .ypBlack
+        label.textColor = .black
         label.textAlignment = .center
         label.numberOfLines = 2
         label.lineBreakMode = .byWordWrapping

@@ -10,6 +10,8 @@ import UIKit
 final class CategoryCreationViewController: UIViewController {
     
     private let trackerCategoryStore = TrackerCategoryStore()
+    var isEditingCategory = false
+    var originalCategoryName: String?
     
     private lazy var titleLabel: UILabel = {
         let label = UILabel()
@@ -24,7 +26,6 @@ final class CategoryCreationViewController: UIViewController {
     
     private lazy var nameTextField: UITextField = {
         let textField = UITextField()
-        textField.placeholder = "Введите название категории"
         textField.backgroundColor = .ypBackgroundDay
         textField.font = UIFont(name: "SFPro-Regular", size: 17)
         textField.layer.cornerRadius = 16
@@ -34,6 +35,12 @@ final class CategoryCreationViewController: UIViewController {
         let paddingView = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: textField.frame.height))
         textField.leftView = paddingView
         textField.leftViewMode = .always
+        
+        let placeholderText = "Введите название категории"
+        textField.attributedPlaceholder = NSAttributedString(
+            string: placeholderText,
+            attributes: [NSAttributedString.Key.foregroundColor: UIColor.ypGray]
+        )
         return textField
     }()
     
@@ -49,9 +56,14 @@ final class CategoryCreationViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
+        view.backgroundColor = .ypWhite
         navigationItem.rightBarButtonItem = nil
         navigationItem.hidesBackButton = true
+        
+        if isEditingCategory {
+            titleLabel.text = "Редактирование категории"
+            nameTextField.text = originalCategoryName
+        }
         
         addSubviews()
         setupConstraints()
@@ -89,7 +101,15 @@ final class CategoryCreationViewController: UIViewController {
     
     @objc func doneButtonTapped() {
         guard let categoryName = nameTextField.text else { return }
-        trackerCategoryStore.addNewTrackerCategory(title: categoryName, trackers: [])
+
+        if isEditingCategory {
+            if let originalName = originalCategoryName {
+                trackerCategoryStore.updateCategory(oldTitle: originalName, newTitle: categoryName)
+            }
+        } else {
+            trackerCategoryStore.addNewTrackerCategory(title: categoryName, trackers: [])
+        }
+
         self.navigationController?.popViewController(animated: true)
     }
     
@@ -101,7 +121,12 @@ final class CategoryCreationViewController: UIViewController {
         let isNameTextFieldEmpty = nameTextField.text?.isEmpty ?? true
         let isButtonEnabled = !isNameTextFieldEmpty
         doneButton.isEnabled = isButtonEnabled
-        doneButton.backgroundColor = isButtonEnabled ? .ypBlack : .ypGray
+        if isButtonEnabled {
+            doneButton.backgroundColor = .ypBlack
+            doneButton.setTitleColor(.ypWhite, for: .normal)
+        } else {
+            doneButton.backgroundColor = .ypGray
+        }
     }
     
 }

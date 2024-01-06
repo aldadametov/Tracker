@@ -13,12 +13,16 @@ struct Tracker: Hashable {
     let color: UIColor?
     let emoji: String
     let schedule: [Schedule]
+    var isPinned: Bool = false
+    var originalCategory: String?
 
-    init(id: UUID = UUID(), name: String, color: UIColor?, emoji: String, schedule: [Schedule]) {
+    init(id: UUID = UUID(), name: String, color: UIColor?, emoji: String, schedule: [Schedule], isPinned: Bool = false, originalCategory: String? = nil) {
         self.id = id
         self.name = name
         self.color = color
         self.emoji = emoji
         self.schedule = schedule
+        self.isPinned = isPinned
+        self.originalCategory = originalCategory
     }
 }

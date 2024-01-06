@@ -15,6 +15,7 @@ protocol CategorySelectionViewModelProtocol {
 
     func fetchCategoryTitles()
     func selectCategory(at index: Int)
+    func deleteCategory(named categoryName: String)
 }
 
 protocol CategorySelectionDelegate: AnyObject {
@@ -38,7 +39,7 @@ final class CategorySelectionViewModel: CategorySelectionViewModelProtocol {
     init(categoryStore: TrackerCategoryStore) {
         self.categoryStore = categoryStore
     }
-
+    
     func fetchCategoryTitles() {
         categoryTitles = categoryStore.fetchAllCategoriesTitles()
     }
@@ -47,5 +48,10 @@ final class CategorySelectionViewModel: CategorySelectionViewModelProtocol {
         let selectedCategory = categoryTitles[index]
         delegate?.categorySelected(selectedCategory)
         onCategorySelected?(selectedCategory)
+    }
+   
+    func deleteCategory(named categoryName: String) {
+        categoryStore.deleteCategory(named: categoryName)
+        fetchCategoryTitles()
     }
 }

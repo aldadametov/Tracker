@@ -10,18 +10,31 @@ import UIKit
 final class TabBarController: UITabBarController {
     override func viewDidLoad() {
         super.viewDidLoad()
-        let trackersViewController = TrackersViewController()
+        let trackerStore = TrackerStore()
+        let trackerCategoryStore = TrackerCategoryStore()
+        let trackerRecordStore = TrackerRecordStore()
+        let analyticsService = AnalyticsService()
+
+        let trackersViewController = TrackersViewController(
+            trackerStore: trackerStore,
+            trackerCategoryStore: trackerCategoryStore,
+            trackerRecordStore: trackerRecordStore,
+            analyticsService: analyticsService
+        )
+
         let trackersNavigationController = UINavigationController(rootViewController: trackersViewController)
+        let trackersLabel = NSLocalizedString("trackers", comment: "Label title for tabBarController")
         trackersNavigationController.tabBarItem = UITabBarItem(
-            title: "Трекеры",
+            title: trackersLabel,
             image: UIImage(named: "trackersButton"),
             selectedImage: nil
         )
 
         let statisticsViewController = StatisticsViewContoller()
         let statisticsNavigationController = UINavigationController(rootViewController: statisticsViewController)
+        let statisticsLabel = NSLocalizedString("statistics", comment: "Label title for tabBarController")
         statisticsNavigationController.tabBarItem = UITabBarItem(
-            title: "Статистика",
+            title: statisticsLabel,
             image: UIImage(named: "statsButton"),
             selectedImage: nil
         )
@@ -29,7 +42,7 @@ final class TabBarController: UITabBarController {
         if #available(iOS 13.0, *) {
             let tabBarAppearance: UITabBarAppearance = UITabBarAppearance()
             tabBarAppearance.configureWithDefaultBackground()
-            tabBarAppearance.backgroundColor = UIColor.white
+            tabBarAppearance.backgroundColor = .ypWhite
             UITabBar.appearance().standardAppearance = tabBarAppearance
 
             if #available(iOS 15.0, *) {
@@ -41,3 +54,4 @@ final class TabBarController: UITabBarController {
         
     }
 }
+

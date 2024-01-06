@@ -57,7 +57,7 @@ final class CustomTableViewCell: UITableViewCell {
         self.layer.masksToBounds = true
 
         let disclosureIndicator = UIImageView(image: UIImage(systemName: "chevron.right"))
-        disclosureIndicator.tintColor = .black
+        disclosureIndicator.tintColor = .ypBlack
         self.accessoryView = disclosureIndicator
     }
 
