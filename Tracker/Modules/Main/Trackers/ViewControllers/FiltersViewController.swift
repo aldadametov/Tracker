@@ -20,21 +20,10 @@ protocol FiltersViewControllerDelegate: AnyObject {
 
 class FiltersViewController: UIViewController {
     
-    private var currentFilter: FilterType
-
-    init(currentFilter: FilterType) {
-        self.currentFilter = currentFilter
-        super.init(nibName: nil, bundle: nil)
-        self.lastSelectedIndexPath = IndexPath(row: currentFilter.rawValue, section: 0)
-    }
-
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
-    private let filterTitles = ["Все трекеры", "Трекеры на сегодня", "Завершённые", "Незавершённые"]
     weak var delegate: FiltersViewControllerDelegate?
     
+    private let filterTitles = ["Все трекеры", "Трекеры на сегодня", "Завершённые", "Незавершённые"]
+    private var currentFilter: FilterType
     private var lastSelectedIndexPath: IndexPath?
     
     private lazy var titleLabel: UILabel = {
@@ -58,6 +47,16 @@ class FiltersViewController: UIViewController {
         tableView.isScrollEnabled = false
         return tableView
     }()
+    
+    init(currentFilter: FilterType) {
+        self.currentFilter = currentFilter
+        super.init(nibName: nil, bundle: nil)
+        self.lastSelectedIndexPath = IndexPath(row: currentFilter.rawValue, section: 0)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()

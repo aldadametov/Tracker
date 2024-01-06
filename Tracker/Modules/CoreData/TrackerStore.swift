@@ -136,12 +136,13 @@ class TrackerStore: NSObject {
         trackerCoreData.schedule = tracker.schedule as NSObject
         trackerCoreData.isPinned = tracker.isPinned
         
-        if !tracker.isPinned && trackerCoreData.originalCategory != nil {
-            let originalCategory = getTrackerCategoryCoreData(by: trackerCoreData.originalCategory! )
+        if !tracker.isPinned, let originalCategoryName = trackerCoreData.originalCategory {
+            let originalCategory = getTrackerCategoryCoreData(by: originalCategoryName)
             trackerCoreData.category = originalCategory
             trackerCoreData.originalCategory = nil
         }
     }
+
     
     func updateTracker(_ updatedTracker: Tracker, inCategory categoryName: String) {
         let fetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
@@ -222,11 +223,8 @@ class TrackerStore: NSObject {
                 }
 
                 let pinnedCategoryTitle = "Закрепленные"
-                var pinnedCategory = getTrackerCategoryCoreData(by: pinnedCategoryTitle)
-                if pinnedCategory == nil {
-                    pinnedCategory = TrackerCategoryCoreData(context: context)
-                    pinnedCategory!.title = pinnedCategoryTitle
-                }
+                let pinnedCategory = getTrackerCategoryCoreData(by: pinnedCategoryTitle) ?? TrackerCategoryCoreData(context: context)
+                pinnedCategory.title = pinnedCategoryTitle
 
                 trackerToMove.category = pinnedCategory
                 try context.save()

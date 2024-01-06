@@ -44,7 +44,7 @@ final class FiltersTableViewCell: UITableViewCell {
     }
     
     func configure(with title: String) {
-        self.titleLabel.text = title
+        titleLabel.text = title
     }
     
     func roundCorners(corners: UIRectCorner, radius: CGFloat) {

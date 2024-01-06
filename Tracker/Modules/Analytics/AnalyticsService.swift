@@ -24,8 +24,35 @@ struct AnalyticsService {
         YMMYandexMetrica.reportEvent(event, parameters: params, onFailure: { error in
             print("REPORT ERROR: %@", error.localizedDescription)
         })
-
-        // Для тестирования
-        print("Reported event: \(event), screen: \(screen), item: \(item ?? "none")")
     }
+    
+    func didOpenMain() {
+        report(event: "open", screen: "Main", item: nil)
+    }    
+    
+    func closedMain() {
+        report(event: "close", screen: "Main", item: nil)
+    }
+    
+    func clickedAddButton() {
+        report(event: "click", screen: "Main", item: "add_track")
+    }    
+    
+    func clickedFilterButton() {
+        report(event: "click", screen: "Main", item: "filter")
+    }
+    
+    func reportEditEventOnMain() {
+        report(event: "click", screen: "Main", item: "edit")
+    }
+
+    func reportDeleteEventOnMain() {
+        report(event: "click", screen: "Main", item: "delete")
+    }
+
+    func reportTrackEventOnMain() {
+        report(event: "click", screen: "Main", item: "track")
+    }
+    
+    
 }

@@ -190,8 +190,8 @@ final class TrackerCreationViewController: UIViewController, ScheduleSelectionDe
         setupActions()
         hideKeyboardWhenTappedAround()
         tableView.separatorColor = .ypGray
-        DispatchQueue.main.async {
-            self.selectInitialCollectionViewItems()
+        DispatchQueue.main.async { [weak self] in
+            self?.selectInitialCollectionViewItems()
         }
     }
     

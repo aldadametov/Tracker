@@ -14,27 +14,8 @@ final class TrackersViewController: UIViewController {
     private let trackerCategoryStore: TrackerCategoryStore
     private let trackerRecordStore: TrackerRecordStore
     private let analyticsService: AnalyticsService
-    private var filteredCategories: [TrackerCategory] = []
     private let searchBar: UISearchBar
-    
-
-    init(trackerStore: TrackerStore,
-         trackerCategoryStore: TrackerCategoryStore,
-         trackerRecordStore: TrackerRecordStore,
-         analyticsService: AnalyticsService,
-         searchBar: UISearchBar = UISearchBar()) {
-        self.trackerStore = trackerStore
-        self.trackerCategoryStore = trackerCategoryStore
-        self.trackerRecordStore = trackerRecordStore
-        self.analyticsService = analyticsService
-        self.searchBar = searchBar
-        super.init(nibName: nil, bundle: nil)
-    }
-
-    required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
+    private var filteredCategories: [TrackerCategory] = []
     private var currentFilter: FilterType = .allTrackers
     private var currentDate: Date = Date()
     private var searchResults: [TrackerCategory] = []
@@ -130,27 +111,77 @@ final class TrackersViewController: UIViewController {
         return button
     }()
     
-    private func showPlaceholder() {
-        let hasNoTrackersForCurrentDate = trackerStore.filteredTrackers(for: currentDate).isEmpty
-        let shouldShow = !isSearchActive && hasNoTrackersForCurrentDate && (currentFilter == .allTrackers || currentFilter == .trackersForToday)
-        noTrackersCreatedLabel.isHidden = !shouldShow
-        noTrackersCreatedImageView.isHidden = !shouldShow
-        filtersButton.isHidden = shouldShow
+    init(trackerStore: TrackerStore,
+         trackerCategoryStore: TrackerCategoryStore,
+         trackerRecordStore: TrackerRecordStore,
+         analyticsService: AnalyticsService,
+         searchBar: UISearchBar = UISearchBar()) {
+        self.trackerStore = trackerStore
+        self.trackerCategoryStore = trackerCategoryStore
+        self.trackerRecordStore = trackerRecordStore
+        self.analyticsService = analyticsService
+        self.searchBar = searchBar
+        super.init(nibName: nil, bundle: nil)
     }
 
-    private func showNoResultsPlaceholder() {
-        let noResultsFromSearch = isSearchActive && searchResults.isEmpty
-        let noTrackersAfterFilter = !isSearchActive && filteredCategories.isEmpty && (currentFilter == .completed || currentFilter == .notCompleted)
-        let shouldShowNoResultsPlaceholder = noResultsFromSearch || noTrackersAfterFilter
-
-        noTrackersFoundLabel.isHidden = !shouldShowNoResultsPlaceholder
-        noTrackersFoundImageView.isHidden = !shouldShowNoResultsPlaceholder
-        trackersCollectionView.isHidden = shouldShowNoResultsPlaceholder
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        analyticsService.didOpenMain()
     }
 
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        view.backgroundColor = .ypWhite
+        updateSearchBarPlaceholderStyle()
+
+        if let navBar = navigationController?.navigationBar {
+            navBar.tintColor = .white
+            let customImage = UIImage(named: "Add tracker")
+            let leftButton = UIBarButtonItem(image: customImage, style: .plain, target: self, action: #selector(addTrackerButtonTapped))
+            leftButton.tintColor = .ypBlack
+            navBar.topItem?.setLeftBarButton(leftButton, animated: false)
+            navBar.topItem?.setRightBarButton(UIBarButtonItem(customView: datePicker), animated: false)
+        }
+        
+        trackersCollectionView.register(SectionHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "SectionHeader")
+        
+        searchBar.placeholder = NSLocalizedString("search", comment: "placeholder text for searchBar")
+        searchBar.delegate = self
+        searchBar.translatesAutoresizingMaskIntoConstraints = false
+        searchBar.backgroundImage = UIImage()
+        trackersCollectionView.delegate = self
+        trackersCollectionView.dataSource = self
+        trackersCollectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 60, right: 0)
+        trackerStore.delegate = self
+        addSubViews()
+        setUpConstraints()
+        hideKeyboardWhenTappedAround()
+        updateFilteredCategories()
+        showPlaceholder()
+        showNoResultsPlaceholder()
+        
+        filtersButton.addTarget(self, action: #selector(filterButtonTapped), for: .touchUpInside )
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        analyticsService.closedMain()
+    }
+    
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        
+        if self.traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+            updateSearchBarPlaceholderStyle()
+        }
+    }
     
     @objc func addTrackerButtonTapped() {
-        analyticsService.report(event: "click", screen: "Main", item: "add_track")
+        analyticsService.clickedAddButton()
         let trackerTypeSelectionVC = TrackerTypeSelectionViewController()
         trackerTypeSelectionVC.delegate = self
         let navController = UINavigationController(rootViewController: trackerTypeSelectionVC)
@@ -158,7 +189,7 @@ final class TrackersViewController: UIViewController {
     }
     
     @objc func filterButtonTapped() {
-        analyticsService.report(event: "click", screen: "Main", item: "filter")
+        analyticsService.clickedFilterButton()
         let filtersVC = FiltersViewController(currentFilter: currentFilter)
         filtersVC.delegate = self
         present(filtersVC, animated: true, completion: nil)
@@ -225,54 +256,22 @@ final class TrackersViewController: UIViewController {
         ])
     }
     
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        view.backgroundColor = .ypWhite
-        updateSearchBarPlaceholderStyle()
-
-        analyticsService.report(event: "open", screen: "Main", item: nil)
-
-        if let navBar = navigationController?.navigationBar {
-            navBar.tintColor = .white
-            let customImage = UIImage(named: "Add tracker")
-            let leftButton = UIBarButtonItem(image: customImage, style: .plain, target: self, action: #selector(addTrackerButtonTapped))
-            leftButton.tintColor = .ypBlack
-            navBar.topItem?.setLeftBarButton(leftButton, animated: false)
-            navBar.topItem?.setRightBarButton(UIBarButtonItem(customView: datePicker), animated: false)
-        }
-        
-        trackersCollectionView.register(SectionHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "SectionHeader")
-        
-        searchBar.placeholder = NSLocalizedString("search", comment: "placeholder text for searchBar")
-        searchBar.delegate = self
-        searchBar.translatesAutoresizingMaskIntoConstraints = false
-        searchBar.backgroundImage = UIImage()
-        trackersCollectionView.delegate = self
-        trackersCollectionView.dataSource = self
-        trackersCollectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 60, right: 0)
-        trackerStore.delegate = self
-        addSubViews()
-        setUpConstraints()
-        hideKeyboardWhenTappedAround()
-        updateFilteredCategories()
-        showPlaceholder()
-        showNoResultsPlaceholder()
-        
-        filtersButton.addTarget(self, action: #selector(filterButtonTapped), for: .touchUpInside )
+    private func showPlaceholder() {
+        let hasNoTrackersForCurrentDate = trackerStore.filteredTrackers(for: currentDate).isEmpty
+        let shouldShow = !isSearchActive && hasNoTrackersForCurrentDate && (currentFilter == .allTrackers || currentFilter == .trackersForToday)
+        noTrackersCreatedLabel.isHidden = !shouldShow
+        noTrackersCreatedImageView.isHidden = !shouldShow
+        filtersButton.isHidden = shouldShow
     }
-    
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        analyticsService.report(event: "close", screen: "Main", item: nil)
-    }
-    
-    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-        super.traitCollectionDidChange(previousTraitCollection)
-        
-        if self.traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
-            updateSearchBarPlaceholderStyle()
-        }
+
+    private func showNoResultsPlaceholder() {
+        let noResultsFromSearch = isSearchActive && searchResults.isEmpty
+        let noTrackersAfterFilter = !isSearchActive && filteredCategories.isEmpty && (currentFilter == .completed || currentFilter == .notCompleted)
+        let shouldShowNoResultsPlaceholder = noResultsFromSearch || noTrackersAfterFilter
+
+        noTrackersFoundLabel.isHidden = !shouldShowNoResultsPlaceholder
+        noTrackersFoundImageView.isHidden = !shouldShowNoResultsPlaceholder
+        trackersCollectionView.isHidden = shouldShowNoResultsPlaceholder
     }
     
     private func updateSearchBarPlaceholderStyle() {
@@ -383,7 +382,9 @@ extension TrackersViewController: UICollectionViewDelegate {
         let categories = isSearchActive ? searchResults : trackerStore.filteredTrackers(for: currentDate)
         let tracker = categories[indexPath.section].trackers[indexPath.row]
 
-        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { _ -> UIMenu? in
+        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { [weak self] _ -> UIMenu? in
+            guard let self = self else { return nil }
+
             let pinActionTitle = tracker.isPinned ? "Открепить" : "Закрепить"
             let pinAction = UIAction(title: pinActionTitle) { action in
                 if tracker.isPinned {
@@ -396,7 +397,7 @@ extension TrackersViewController: UICollectionViewDelegate {
             let editAction = UIAction(title: "Редактировать") { [weak self] action in
                 guard let self = self else { return }
                 let categoryTitle = self.trackerStore.getCategoryForTracker(withId: tracker.id) ?? ""
-                analyticsService.report(event: "click", screen: "Main", item: "edit")
+                analyticsService.reportEditEventOnMain()
                 
                 let allDaysOfWeek: Set<Schedule> = [.monday, .tuesday, .wednesday, .thursday, .friday, .saturday, .sunday]
                 let isEvent = Set(tracker.schedule) == allDaysOfWeek
@@ -410,7 +411,7 @@ extension TrackersViewController: UICollectionViewDelegate {
 
             let deleteAction = UIAction(title: "Удалить", attributes: .destructive) { [weak self] action in
                 guard let self = self else { return }
-                analyticsService.report(event: "click", screen: "Main", item: "delete")
+                analyticsService.reportDeleteEventOnMain()
 
                 let alertController = UIAlertController(title: "", message: "Уверены что хотите удалить трекер?", preferredStyle: .actionSheet)
 
@@ -499,7 +500,7 @@ extension TrackersViewController: TrackerCellDelegate {
         if currentDate > today {
             return
         }
-        analyticsService.report(event: "click", screen: "Main", item: "track")
+        analyticsService.reportTrackEventOnMain()
         
         let isCompleted = trackerRecordStore.isTrackerCompleted(selectedTracker, on: currentDate)
        
