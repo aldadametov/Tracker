@@ -45,10 +45,18 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         return label
     }()
     
+    private let pinImageView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.image = UIImage(named: "pin")
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        imageView.isHidden = true
+        return imageView
+    }()
+    
     let trackerLabel: UILabel = {
         let label = UILabel()
         label.frame = CGRect(x: 0, y: 0, width: 143, height: 34)
-        label.textColor = .ypWhite
+        label.textColor = .white
         label.font = UIFont(name: "SFPro-Medium", size: 12)
         label.numberOfLines = 2
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -76,7 +84,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         let button = UIButton()
         button.frame = CGRect(x: 0, y: 0, width: 34, height: 34)
         button.setImage(UIImage(systemName: "plus"), for: .normal)
-        button.tintColor = .white 
+        button.tintColor = .white
         button.layer.cornerRadius = 17
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
@@ -91,6 +99,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         
         contentView.addSubview(trackerCardView)
         trackerCardView.addSubview(emojiBackgroundView)
+        trackerCardView.addSubview(pinImageView)
         emojiBackgroundView.addSubview(emojiLabel)
         trackerCardView.addSubview(trackerLabel)
         contentView.addSubview(quantityManagementView)
@@ -113,6 +122,9 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
             emojiLabel.centerXAnchor.constraint(equalTo: emojiBackgroundView.centerXAnchor),
             emojiLabel.centerYAnchor.constraint(equalTo: emojiBackgroundView.centerYAnchor),
             
+            pinImageView.topAnchor.constraint(equalTo: trackerCardView.topAnchor, constant: 12),
+            pinImageView.trailingAnchor.constraint(equalTo: trackerCardView.trailingAnchor, constant: -4),
+            
             trackerLabel.leadingAnchor.constraint(equalTo: trackerCardView.leadingAnchor, constant: 12),
             trackerLabel.bottomAnchor.constraint(equalTo: trackerCardView.bottomAnchor, constant: -12),
             trackerLabel.widthAnchor.constraint(equalToConstant: 143),
@@ -134,5 +146,9 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    func configureWith(tracker: Tracker) {
+        pinImageView.isHidden = !tracker.isPinned
     }
 }

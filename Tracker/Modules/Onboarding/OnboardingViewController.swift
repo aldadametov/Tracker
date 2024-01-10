@@ -21,7 +21,7 @@ final class OnboardingViewController: UIPageViewController, UIPageViewController
         pageControl.numberOfPages = pages.count
         pageControl.currentPage = 0
         
-        pageControl.currentPageIndicatorTintColor = .ypBlack
+        pageControl.currentPageIndicatorTintColor = .black
         pageControl.pageIndicatorTintColor = .ypGray
         
         pageControl.translatesAutoresizingMaskIntoConstraints = false
@@ -32,7 +32,7 @@ final class OnboardingViewController: UIPageViewController, UIPageViewController
         let button = UIButton()
         button.setTitle("Вот это технологии!", for: .normal)
         button.titleLabel?.font = UIFont(name: "SFPro-Medium", size: 16)
-        button.backgroundColor = .ypBlack
+        button.backgroundColor = .black
         button.layer.cornerRadius = 16
         button.translatesAutoresizingMaskIntoConstraints = false
         return button

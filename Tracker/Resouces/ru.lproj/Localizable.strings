@@ -1,0 +1,14 @@
+/* 
+  Localizable.strings
+  Tracker
+
+  Created by Алишер Дадаметов on 26.12.2023.
+  
+*/
+"trackers" = "Трекеры";
+"what_to_track" = "Что будем отслеживать?";
+"nothing_found" = "Ничего не найдено";
+"statistics" = "Статистика";
+"search" = "Поиск";
+"filters" = "Фильтры";
+

@@ -19,7 +19,7 @@ enum Schedule: Int, CaseIterable, Codable {
     func representation() -> String {
         switch self {
         case .monday:
-            return "Понеделиник"
+            return "Понедельник"
         case .tuesday:
             return "Вторник"
         case .wednesday:

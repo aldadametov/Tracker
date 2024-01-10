@@ -21,7 +21,7 @@ final class RedBackgroundVC: UIViewController {
         let label = UILabel()
         label.text = "Даже если это не литры воды и йога"
         label.font = UIFont(name: "SFPro-Bold", size: 32)
-        label.textColor = .ypBlack
+        label.textColor = .black
         label.textAlignment = .center
         label.numberOfLines = 2
         label.lineBreakMode = .byWordWrapping
